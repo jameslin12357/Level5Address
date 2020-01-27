@@ -1,0 +1,481 @@
+﻿html, body {
+    height: 100%;
+    margin: 0;
+}
+/*小区列表与楼宇列表分隔符*/
+.panel-htop:nth-child(2) {
+    padding-right: 15px;
+    position: relative;
+}
+
+    .panel-htop:nth-child(2)::after {
+        content: ' ';
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        width: 15px;
+        height: 100%;
+        background: url(imgs/segmentation.png) no-repeat center;
+        /*background-size: 15px 15px;*/
+    }
+/*小区列表与楼宇列表分隔符*/
+#container {
+    height: 60%;
+    margin: 0;
+    transition: all .2s;
+    -moz-transition: all .2s; /* Firefox 4 */
+    -webkit-transition: all .2s; /* Safari 和 Chrome */
+    -o-transition: all .2s; /* Opera */
+    position: relative;
+}
+
+.containerShow {
+    height: 100% !important;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+}
+
+#mapSearch {
+    position: absolute;
+    top: 110px;
+    left: 20px;
+    z-index: 2001;
+}
+
+.flex {
+    display: flex;
+}
+
+.sb {
+    justify-content: space-between;
+}
+
+.pd-20 {
+    padding: 20px;
+}
+
+.pd-10 {
+    padding: 10px;
+}
+
+.pb-5px {
+    padding-bottom: 5px;
+}
+
+.pd-5px {
+    padding: 5px;
+}
+
+.bb-lightblue {
+    border-bottom: 1px solid #57D2E4;
+}
+
+.bd2-lightblue {
+    border: 2px solid lightblue;
+}
+
+.cr-lightblue {
+    color: lightblue;
+}
+
+.bn {
+    border: none;
+}
+
+#header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2000;
+    background-color: white;
+}
+
+#footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 2000;
+    height: 40%;
+    transition: all .2s;
+    -moz-transition: all .2s; /* Firefox 4 */
+    -webkit-transition: all .2s; /* Safari 和 Chrome */
+    -o-transition: all .2s; /* Opera */
+}
+
+.footerHide {
+    height: 0px !important;
+}
+
+.mr-10px {
+    margin-right: 10px;
+}
+
+.mr-10 {
+    margin-right: 10px;
+}
+
+.mb-5 {
+    margin-bottom: 5px;
+}
+
+.clRedError {
+    color: red;
+}
+
+.mr-20 {
+    margin-right: 20px;
+}
+
+.mr-5 {
+    margin-right: 5px;
+}
+
+.mb-10 {
+    margin-bottom: 10px;
+}
+
+.mb-15 {
+    margin-bottom: 15px;
+}
+
+.mb-10 {
+    margin-bottom: 10px;
+}
+
+.mr-10p {
+    margin-right: 10%;
+}
+
+.aic {
+    align-items: center;
+}
+
+#inputSearchIcon {
+    position: relative;
+    left: -30px;
+}
+
+.w-70p {
+    width: 70%;
+}
+
+.w-30p {
+    width: 30%;
+}
+
+.modalSmall {
+    background: white;
+    position: fixed;
+    top: 100px;
+    right: 25px;
+    padding: 25px;
+}
+
+.modalCentered {
+    right: 33% !important;
+    left: 33% !important;
+    top: 33% !important;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+#buttonOpenClose {
+    border-radius: 10px;
+    border: 1px solid #57D2E4;
+    background: white;
+    position: absolute;
+    top: -110px;
+    right: 90px;
+    padding: 5px 10px;
+    z-index: 2002;
+}
+
+#buttonOpenClose2 {
+    border-radius: 10px;
+    border: 1px solid #57D2E4;
+    background: white;
+    position: absolute;
+    top: -60px;
+    right: 90px;
+    padding: 5px 10px;
+    z-index: 2002;
+}
+
+#checkboxSatelliteLayer {
+    position: fixed;
+    right: 120px;
+    top: 120px;
+    z-index: 3000;
+}
+
+.fr {
+    float: right;
+}
+
+.tc {
+    text-align: center;
+}
+
+.tr {
+    text-align: right;
+}
+
+.cursorPointer {
+    cursor: pointer;
+}
+
+.selectedButton {
+    background-color: lightgray !important;
+}
+
+.tabsMain {
+    border: 1px solid #C9C9C9;
+    border-radius: 100px;
+}
+
+.tabBorderLeft {
+    border-radius: 100px 0 0 100px;
+}
+
+.tabBorderRight {
+    border-radius: 0 100px 100px 0;
+}
+
+.m0 {
+    margin: 0 !important;
+}
+
+.bd0 {
+    border: none;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#logo {
+    font-size: 25px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.selectPCC {
+    width: 150px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    text-align-last: center;
+    font-size: 21px;
+    border: none;
+    font-family: "HYYanHuShouShuW-2";
+}
+
+select::-ms-expand {
+    display: none;
+}
+
+#panelLeft {
+    width: 70% !important;
+}
+
+#panelRight {
+    width: 30% !important;
+}
+
+.w-100p {
+    width: 100% !important;
+}
+
+#pb {
+    position: fixed;
+    top: 300px;
+    width: 33%;
+    left: 33%;
+}
+
+.panel-header, .panel-body {
+    width: 100% !important;
+}
+
+.ml-3px {
+    margin-left: 3px;
+}
+
+#poiDetail {
+    right: 20px;
+}
+
+#menuiconNav {
+    width: 15px;
+    height: 15px;
+}
+
+.pd-15100 {
+    padding: 15px 100px 15px 100px;
+}
+
+select {
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+}
+
+.fs20 {
+    font-size: 20px;
+}
+
+/*@media screen and (min-width: 992px) {
+    #selectFilter {
+        margin-left: 10%;
+    }
+}*/
+
+#sublogo {
+    text-align: center;
+    width: 200px;
+    padding: 15px;
+}
+
+.checkbox {
+    border: 2px solid lightblue !important;
+}
+
+.checkbox-checked {
+    background: lightblue !important;
+}
+
+
+
+
+
+
+
+
+@font-face {
+    font-family: 'HYYanHuShouShuW-2';
+    src: url('font/HYYanHuShouShuW-2.ttf') format('truetype');
+}
+
+.shadowTopBox {
+    position: absolute;
+    top: 71px;
+    left: 0px;
+    width: 100%;
+    height: 30px;
+    background: -webkit-linear-gradient(#FFFFFF,transparent); /* Safari 5.1 - 6.0 */
+    background: -o-linear-gradient(#FFFFFF,transparent); /* Opera 11.1 - 12.0 */
+    background: -moz-linear-gradient(#FFFFFF,transparent); /* Firefox 3.6 - 15 */
+    background: linear-gradient(#FFFFFF,transparent); /* 标准的语法 */
+}
+
+.shadowBottomBox {
+    position: absolute;
+    top: -30px;
+    left: 0px;
+    width: 100%;
+    height: 30px;
+    background: -webkit-linear-gradient(transparent,#FFFFFF); /* Safari 5.1 - 6.0 */
+    background: -o-linear-gradient(transparent,#FFFFFF); /* Opera 11.1 - 12.0 */
+    background: -moz-linear-gradient(transparent,#FFFFFF); /* Firefox 3.6 - 15 */
+    background: linear-gradient(transparent,#FFFFFF); /* 标准的语法 */
+}
+
+#selectFilter {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 460px;
+    height: 50px;
+    transform: translateX(-50%) translateY(-50%);
+    -ms-transform: translateX(-50%) translateY(-50%); /* IE 9 */
+    -moz-transform: translateX(-50%) translateY(-50%); /* Firefox */
+    -webkit-transform: translateX(-50%) translateY(-50%); /* Safari 和 Chrome */
+    -o-transform: translateX(-50%) translateY(-50%); /* Opera */
+}
+
+.relativePosition {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.displayFlexCenter {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+}
+
+#buttonShowHidden {
+    border-radius: 10px;
+    border: 1px solid #57D2E4;
+    background: white;
+    position: absolute;
+    top: -60px;
+    right: 20px;
+    padding: 5px 10px;
+    z-index: 2002;
+    cursor: pointer;
+}
+
+.CellInformation {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    z-index: 1999;
+    width: 100%;
+    height: 70px;
+    background-color: #FFFFFF;
+    transition: all .2s;
+    -moz-transition: all .2s; /* Firefox 4 */
+    -webkit-transition: all .2s; /* Safari 和 Chrome */
+    -o-transition: all .2s; /* Opera */
+    display: none;
+}
+
+.CellInformationShow {
+    display: block;
+}
+
+.ListBtn {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    background: url(imgs/下箭头.png) no-repeat center;
+    text-align: center;
+    display: block;
+}
+
+.segmentation {
+}
+
+.panel-header, .panel-body {
+    border-color: #57D2E4
+}
+
+.mb-5px {
+    margin-bottom: 5px!important;
+}
+
+.labelMarker{
+    border: 0!important;
+}
+
+.amap-logo {
+    display: none;
+    opacity: 0 !important;
+}
+
+.amap-copyright {
+    opacity: 0;
+}
+

@@ -1,0 +1,178 @@
+﻿body {
+    padding: 25px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mt-15 {
+    margin-top: 15px;
+}
+
+
+#searchContainer {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    bottom: 20px;
+    width: 300px;
+    opacity: 0.7;
+    background-color: lightgray;
+    overflow: scroll;
+}
+
+#countySelect {
+    display: flex;
+    justify-content: center;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    /*right: 33%;*/
+}
+
+#tablesContainer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+#tablesContainer2 {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: -300px;
+}
+
+#buttonsGroup1 {
+    display: flex;
+    justify-content: center;
+    position: fixed;
+    left: 33%;
+    right: 33%;
+    bottom: 260px;
+}
+
+#tablesContainerInner, #tablesContainerInner2 {
+    display: flex;
+}
+
+.amap-logo, .amap-copyright {
+    display: none !important;
+}
+
+.layui-form-item .layui-input-inline {
+    width: 120px;
+}
+
+.mr-5 {
+    margin-right: 5px;
+}
+
+.mb-15 {
+    margin-bottom: 15px;
+}
+
+.hidden {
+    display: none!important;
+}
+
+.bottom20 {
+    bottom: 20px!important;
+}
+
+.bottom300 {
+    bottom: -300px!important;
+}
+
+#buttonToggleTables {
+    position: fixed;
+    right: 20px;
+    bottom: 260px;
+    background: url(imgs/下箭头.png) no-repeat center;
+    border-radius: 10px;
+    border: 1px solid #57D2E4;
+    /*background: white;*/
+    /*padding: 5px 10px;*/
+}
+
+
+/*#buttonShowHidden {
+    border-radius: 10px;
+    border: 1px solid #57D2E4;
+    background: white;
+    position: absolute;
+    top: -60px;
+    right: 20px;
+    padding: 5px 10px;
+    z-index: 2002;
+    cursor: pointer;
+}
+
+.CellInformation {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    z-index: 1999;
+    width: 100%;
+    height: 70px;
+    background-color: #FFFFFF;
+    transition: all .2s;
+    -moz-transition: all .2s; /* Firefox 4 */
+    -webkit-transition: all .2s; /* Safari 和 Chrome */
+    -o-transition: all .2s; /* Opera */
+    display: none;
+}
+
+.CellInformationShow {
+    display: block;
+}
+
+.ListBtn {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    background: url(imgs/下箭头.png) no-repeat center;
+    text-align: center;
+    display: block;
+}
+
+.segmentation {
+}*/
+
+.panel-header, .panel-body {
+    border-color: #57D2E4
+}
+
+#sep {
+    width: 2%;
+    position: fixed;
+    left: 49%;
+    bottom: 0;
+    /*border: 1px solid #57D2E4;*/
+    background: url(imgs/segmentation.png) no-repeat center;
+    height: 250px;
+}
+
+.panel-title {
+    display: flex;
+    justify-content: space-between;
+    
+}
+
+.cursorPointer {
+    cursor: pointer;
+}
+
+#tbS,#tbC,#tbV,#tbB {
+    display: flex;
+    justify-content: space-between;
+    background: linear-gradient(to bottom,#EFF5FF 0,#E0ECFF 100%);
+    background-repeat: repeat-x;
+    padding: 5px;
+}
+
+.bold {
+    font-weight: bold;
+}

@@ -1,0 +1,80 @@
+
+say for a region there are 10000 villages and 10000 buildings
+under normal conditions, there should be 10000 complete records for villages
+and 10000 complete records for buildings and 10000 areas on gaode map
+and 10000 3d buildings on gaode map
+The reality is that for villages, all gaode areas are provided
+but only 8000 records are given (some have no bounds thus you must fill out in order to fix
+such issue) and you have to draw manually to fix other 2000 records
+For buildings, 7000 3d buildings are provided by gaode and for these
+6000 records are given (some have no bounds thus you must fill out in order to fix such issue)
+and you have to draw manually to fix other 1000 records
+For other 3000 3d buildings you must render them yourself with special instructions
+and draw manually to fix these 3000 records
+Once these steps are taken, you should have 10000 villages on gaode map along with 10000
+villages records and 10000 buildings on gaode map (some of which are done through special instructions)
+along with 10000 buildings records 
+With complete map renderings and records, you can now display these POIs normally
+When you render a village, on top of area and record, use bounds to draw green polygon and turn it purple when under highlight
+When you render a building, on top of 3d building and record, use lnglat to draw a blue marker and turn it red when under highlight
+
+Current functionalities
+1. Get gaode POIs data separately through Nodejs file
+2. Create village/building
+3. Highlight village/building
+4. Highlight/Detail village/building
+5. Highlight/Edit village/building
+6. Highlight/Delete village/building
+7. Filter villages through search terms or hasbuildings
+8. Show/Hide bottom part
+9. Compass
+
+Possible functionalities (Currently removed)
+1. Provice, city, county, has bounds filters
+2. Satellite laer toggle
+3. Show/Hide villages bounds
+4. Show/Hide buildings names
+
+LOGIC
+For instance, there are 100 villages and 100 buildings for a region 
+thus normally there should be 100 areas on map and 100 records for villages
+and 100 3d buildings on map and 100 records for buildings
+The reality:
+For villages, all 100 areas are provided (checked). For records, gaode gives 70 (some of which have no bounds so you fix them) and 
+you draw 30 through create village form so you end up with all 100 records. (checked)
+For buildings, 70 3d buildings are provided and 30 are not. You fix these 30 3d buildings yourself(checked). For records, gaode gives 60 (some of 
+which have no bounds so you fix them) and you draw 10 through create building form (mode #1) which match up 10 of 3d buildings that are alreay provided. You then
+draw rest 30 through create building form (mode #2) which match up with buildings that are not on gaode map at all. You solve issue of not on map at same time. (checked)
+
+Once these steps are taken, you have all 100 areas and 100 records for villages and 100 3d buildings and 100 records for building.
+You can now display these POIs normally.
+When you render a village, on top of area and record, use bounds to draw green polygon and turn it purple when under highlight
+When you render a building, on top of 3d building and record, use lnglat to draw a blue marker and turn it red when under highlight
+
+Current functionalities
+1. Get gaode POIs data separately through Nodejs file
+2. Create village/building
+3. Highlight village/building
+4. Highlight/Detail village/building
+5. Highlight/Edit village/building
+6. Highlight/Delete village/building
+7. Filter villages through search terms or hasbuildings
+8. Show/Hide bottom part
+9. Compass
+
+Possible functionalities (Currently removed)
+1. Provice, city, county, has bounds filters
+2. Satellite laer toggle
+3. Show/Hide villages bounds
+4. Show/Hide buildings names
+
+Logic
+1. For every street, there should be a complete record and area on gaode map.
+1. For every village, there should be a complete record and area on gaode map.
+2. For every building, there should be a complete record and 3d building on gaode map.
+
+by default, say user has 1000 streets, 1000 communities, 1000 villages, 1000 buildings
+render them all on map (area and lightblue polygon, area and lightyellow polygon, area and lightgreen polygon, 3d building/object layer and blue marker)
+and render 50 of each types on paginated tables (4 of them)
+User may now highlight each item (say darkblue polygon, darkyellow polygon, darkgreen polygon, red marker), highlight/detail/edit/delete each item, create each item,
+search each item

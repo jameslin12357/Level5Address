@@ -1,0 +1,124 @@
+﻿ 
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="../../../HtmlLibs/easyui/themes/default/easyui.css" rel="stylesheet" />
+    <link href="../../../HtmlLibs/easyui/themes/icon.css" rel="stylesheet" />
+    <!--<link href="../../../HtmlLibs/layui/css/layui.css" rel="stylesheet" />-->
+    <link href="layui-v2.5.4/layui/css/layui.css" rel="stylesheet" />
+    <link href="Level5Address.css" rel="stylesheet" />
+    <title>五级地址库</title>
+</head>
+<body>
+  <!--  <div id="header" class="flex pd-10 bb-lightblue aic">
+        <div id="logo" class="mr-10px">
+            JJLBS-SERVICE
+        </div>
+        <div class="mr-10px">
+            <img id="menuiconNav" src="imgs/menu.png" />
+        </div>
+        <div class="bb-lightblue bold" id="sublogo">
+            五级地址库
+        </div>--!>
+   <!--     <div id="selectFilter" class="displayFlexCenter">
+            <select id="selectProvince" class="selectPCC">
+                <option value="">全部</option>
+            </select>
+            <span class="fs20">/</span>
+            <select id="selectCity" class="selectPCC">
+                <option value="">全部</option>
+            </select>
+            <span class="fs20">/</span>
+            <select id="selectCounty" class="selectPCC">
+                <option value="">全部</option>
+            </select>
+        </div>--!>
+        <!--<div class="tabsMain">
+            <button type="button" class="layui-btn layui-btn-primary layui-btn-radius selectedButton tabBorderLeft bd0">高德地图</button>
+            <button type="button" class="layui-btn layui-btn-primary layui-btn-radius tabBorderRight m0 bd0">ARCGIS</button>
+        </div>-->
+ <!--       <div class="shadowTopBox"></div>
+    </div>--!>
+    <div id="footer" class="flex">
+        <div class="shadowBottomBox"></div>
+        <div id="tb" class="flex sb aic" style="padding: 5px 10px;">
+            <span class="bb-lightblue pb-5px">小区信息</span>
+            <div class="flex aic">
+                <div class="mr-10">
+                    <input id="checkboxHasBuildings" class="easyui-checkbox" label="有楼宇">
+                </div>
+          <!--      <div class="mr-10">
+                    <input id="checkboxHasBounds" class="easyui-checkbox" label="有边界">
+                </div>--!>
+                <input type="text" id="inputSearchVillage" placeholder="输入小区名称检索" class="mr-10 pd-5px bd2-lightblue" />
+                <i id="inputSearchIcon" class="fa fa-search cr-lightblue" onclick="searchVillage(this)"></i>
+                <div class="mr-10 cursorPointer" onclick="createVillage(this)">
+                    <i class="fa fa-file-o cr-lightblue"></i>
+                    <span>新建小区</span>
+                </div>
+             <!--   <div class="cursorPointer" onclick="getVillage(this)">
+                    <i class="fa fa-download cr-lightblue" id="getVillage"></i>
+                    <span>更新本地数据</span>
+                </div>--!>
+            </div>
+        </div>
+        <div id="tb2" class="flex sb aic" style="padding: 5px 10px;">
+            <span class="bb-lightblue pb-5px">楼宇信息</span>
+            <div class="flex aic">
+             <!--   <input type="text" id="inputSearchBuilding" placeholder="输入楼宇号检索" class="mr-10 pd-5px bd2-lightblue" />
+                <i id="inputSearchIcon" class="fa fa-search cr-lightblue" onclick="searchBuilding(this)"></i>--!>
+                <div class="mr-10 cursorPointer" onclick="createBuilding(this)">
+                    <i class="fa fa-file-o cr-lightblue"></i>
+                    <span>新建楼宇</span>
+                </div>
+             <!--   <div class="cursorPointer" onclick="getBuilding(this)">
+                    <i class="fa fa-download cr-lightblue"></i>
+                    <span>更新本地数据</span>
+                </div>--!>
+            </div>
+        </div>
+        <table id="dg" class="easyui-datagrid" style="width: 65%; height: 100%" iconcls="icon-save" pagination="true" data-options="fitColumns:true,rownumbers:false,singleSelect:true,pagination:true,toolbar:tb,loadMsg:'数据加载中'">
+            <thead>
+                <tr></tr>
+            </thead>
+        </table>
+        <table id="dg2" class="easyui-datagrid" style="width: 35%; height: 100%" iconcls="icon-save" pagination="true" data-options="fitColumns:true,rownumbers:false,singleSelect:true,pagination:true,toolbar:tb2,loadMsg:'数据加载中'">
+            <thead>
+                <tr></tr>
+            </thead>
+        </table>
+    </div>
+    <div class="c">
+        <main role="main" class="pb-3">
+        </main>
+    </div>
+    <div id="container">
+        <div id="mapSearch"></div>
+        <div id="map"></div>
+    </div>
+
+   <!-- <form class="layui-form" action="" id="checkboxSatelliteLayer">
+    <div class="layui-form-item" pane="">
+    <div class="layui-input-block">
+      <input type="checkbox" lay-skin="primary" title="卫星图层" lay-filter="checkboxSatelliteLayerFilter">
+    </div>
+  </div>
+ 
+        </form>--!>
+    <div class="CellInformation">
+        <div class="relativePosition">
+            <div class="shadowBottomBox"></div>
+        </div>
+    </div>
+    <script src="../../../HtmlLibs/easyui/jquery.min.js"></script>
+    <script src="../../../HtmlLibs/easyui/jquery.easyui.min.js"></script>
+    <script src="../../../HtmlLibs/easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script src="https://webapi.amap.com/maps?v=1.4.15&amp;key=3cd18e86c129259575068fdb7f2522e0&amp;plugin=AMap.PolyEditor,AMap.Scale,AMap.ControlBar,Map3D"></script>
+    <!--<script src="../../../HtmlLibs/layui/layui.js"></script>-->
+    <script src="layui-v2.5.4/layui/layui.js"></script>
+    <script src="Level5Address.js"></script>
+</body>
+</html>

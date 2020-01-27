@@ -1,0 +1,423 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
+    <title>Object3D 的添加/移除</title>
+    <meta name="description" content="对 Object3D 对象进行添加和移除的基本操作。">
+    <style>
+        html,
+        body,
+        #container {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <div class="input-card" style="width: auto;">
+        <div class="input-item">
+            <button id="add-obj3d-btn" class="btn">添加 Object3D</button>
+        </div>
+        <div class="input-item">
+            <button id="rm-obj3d-btn" class="btn">移除 Object3D</button>
+        </div>
+    </div>
+    <!-- 加载地图JSAPI脚本 -->
+    <script src="https://webapi.amap.com/maps?v=1.4.15&key=您申请的key值"></script>
+    <script>
+        // 创建 3D 底图
+        var map;
+        map = new AMap.Map('container', {
+            viewMode: '3D', // 开启 3D 模式
+            pitch: 55,
+            rotation: 35,
+            center: [116.992457,36.588966],
+            zoom: 16
+        });
+
+        // 添加 Object3DLayer 图层，用于添加 3DObject 对象
+        //var object3Dlayer = new AMap.Object3DLayer();
+        //map.add(object3Dlayer);
+
+        //// 以不规则棱柱体 Prism 为例，添加至 3DObjectLayer 图层中
+        //var paths = [
+        //    [116.395951, 39.907129],
+        //    [116.399127, 39.907178],
+        //    [116.399534, 39.900413],
+        //    [116.396316, 39.900331]
+        //];
+
+        //var bounds = paths.map(function (path) {
+        //    return new AMap.LngLat(path[0], path[1]);
+        //});
+
+        //// 创建 Object3D 对象
+        //var prism = new AMap.Object3D.Prism({
+        //    path: bounds,
+        //    height: 500,
+        //    color: 'rgba(100, 150, 230, 0.7)' // 支持 #RRGGBB、rgb()、rgba() 格式数据
+        //});
+
+        //// 开启透明度支持
+        //prism.transparent = true;
+
+        //// 添加至 3D 图层
+        //object3Dlayer.add(prism);
+
+        ////绑定按钮事件
+        //document.querySelector("#add-obj3d-btn").onclick = function () {
+        //    // 添加至 3D 图层
+        //    object3Dlayer.add(prism);
+        //};
+
+        //document.querySelector("#rm-obj3d-btn").onclick = function () {
+        //    // 从 3D 图层中移除
+        //    object3Dlayer.remove(prism);
+        //};
+
+        function loadBuildings(map) {
+    var object3Dlayer = new AMap.Object3DLayer();
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "http://59.44.20.201:30101/JJLBS_WEB/JJLBSRESOURCE/Page/LBS/Level5Address/Level5Address.ashx?m=GetBuildingsNotOnMap");
+    xhr.send();
+    xhr.onload = function () {
+        if (xhr.status != 200) { // analyze HTTP status of the response
+            alert(`Error ${xhr.status}: ${xhr.statusText}`); // e.g. 404: Not Found
+        } else {
+            //var buildingLayer = new AMap.Buildings({ zIndex: 130, merge: false, sort: false, zooms: [17,20]  });
+
+            var buildings = JSON.parse(xhr.response);
+
+            for (var i = 0; i < buildings.length; i++) {
+                var bounds = JSON.parse(buildings[i]["BOUNDS"]);
+                // 创建 Object3D 对象
+                var prism = new AMap.Object3D.Prism({
+                    path: bounds.map(function (coord) {
+                        return new AMap.LngLat(coord[0], coord[1]);
+                    }),
+                    height: buildings[i]["HEIGHT"],
+                    color: 'rgba(112,128,144,1)' // 支持 #RRGGBB、rgb()、rgba() 格式数据
+                });
+
+                // 开启透明度支持
+                prism.transparent = true;
+
+                // 添加至 3D 图层
+                object3Dlayer.add(prism);
+
+            }
+            map.add(object3Dlayer);
+            object3Dlayer.hide();
+            map.on("zoomchange", function (e) {
+                var zoom = map.getZoom();
+                if (zoom >= 17) {
+                    object3Dlayer.show();
+                } else {
+                    object3Dlayer.hide();
+                }
+            });
+        }
+    };
+
+
+}
+
+function loadTingQiBuildings1() {
+    var object3Dlayer = new AMap.Object3DLayer();
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "http://59.44.20.201:30101/JJLBS_WEB/JJLBSRESOURCE/Page/LBS/Level5Address/Level5Address.ashx?m=GetBuildingsNotOnMapMCMY");
+    xhr.send();
+    xhr.onload = function () {
+        if (xhr.status != 200) { // analyze HTTP status of the response
+            alert(`Error ${xhr.status}: ${xhr.statusText}`); // e.g. 404: Not Found
+        } else {
+            //var buildingLayer = new AMap.Buildings({ zIndex: 130, merge: false, sort: false, zooms: [17,20]  });
+
+            var buildings = JSON.parse(xhr.response);
+
+            for (var i = 0; i < buildings.length; i++) {
+                var bounds = JSON.parse(buildings[i]["BOUNDS"]);
+                // 创建 Object3D 对象
+                var prism = new AMap.Object3D.Prism({
+                    path: bounds.map(function (coord) {
+                        return new AMap.LngLat(coord[0], coord[1]);
+                    }),
+                    height: buildings[i]["HEIGHT"],
+                    color: 'rgba(255,255,0, 0.8)' // 支持 #RRGGBB、rgb()、rgba() 格式数据
+                });
+
+                // 开启透明度支持
+                prism.transparent = true;
+
+                // 添加至 3D 图层
+                object3Dlayer.add(prism);
+
+            }
+
+
+        }
+
+    };
+    return object3Dlayer;
+}
+function loadGuanFaBuildings1() {
+    var object3Dlayer = new AMap.Object3DLayer();
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "http://59.44.20.201:30101/JJLBS_WEB/JJLBSRESOURCE/Page/LBS/Level5Address/Level5Address.ashx?m=GetBuildingsNotOnMapMCMY");
+    xhr.send();
+    xhr.onload = function () {
+        if (xhr.status != 200) { // analyze HTTP status of the response
+            alert(`Error ${xhr.status}: ${xhr.statusText}`); // e.g. 404: Not Found
+        } else {
+            //var buildingLayer = new AMap.Buildings({ zIndex: 130, merge: false, sort: false, zooms: [17,20]  });
+
+            var buildings = JSON.parse(xhr.response);
+
+            for (var i = 0; i < buildings.length; i++) {
+                var bounds = JSON.parse(buildings[i]["BOUNDS"]);
+                // 创建 Object3D 对象
+                var prism = new AMap.Object3D.Prism({
+                    path: bounds.map(function (coord) {
+                        return new AMap.LngLat(coord[0], coord[1]);
+                    }),
+                    height: buildings[i]["HEIGHT"],
+                    color: 'rgba(255,0,0,0.8)'
+                    //color: 'rgba(153,255,0,0.8)' // 支持 #RRGGBB、rgb()、rgba() 格式数据
+                });
+
+                // 开启透明度支持
+                prism.transparent = true;
+
+                // 添加至 3D 图层
+                object3Dlayer.add(prism);
+
+            }
+
+
+        }
+
+    };
+    return object3Dlayer;
+}
+function loadTingQiBuildings2() {
+    var object3Dlayer = new AMap.Object3DLayer();
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "http://59.44.20.201:30101/JJLBS_WEB/JJLBSRESOURCE/Page/LBS/Level5Address/Level5Address.ashx?m=GetBuildingsNotOnMapJNTR");
+    xhr.send();
+    xhr.onload = function () {
+        if (xhr.status != 200) { // analyze HTTP status of the response
+            alert(`Error ${xhr.status}: ${xhr.statusText}`); // e.g. 404: Not Found
+        } else {
+            //var buildingLayer = new AMap.Buildings({ zIndex: 130, merge: false, sort: false, zooms: [17,20]  });
+
+            var buildings = JSON.parse(xhr.response);
+
+            for (var i = 0; i < buildings.length; i++) {
+                var bounds = JSON.parse(buildings[i]["BOUNDS"]);
+                // 创建 Object3D 对象
+                var prism = new AMap.Object3D.Prism({
+                    path: bounds.map(function (coord) {
+                        return new AMap.LngLat(coord[0], coord[1]);
+                    }),
+                    height: buildings[i]["HEIGHT"],
+                    color: 'rgba(255, 255, 0, 0.8)' // 支持 #RRGGBB、rgb()、rgba() 格式数据
+                });
+
+                // 开启透明度支持
+                prism.transparent = true;
+
+                // 添加至 3D 图层
+                object3Dlayer.add(prism);
+
+            }
+
+
+        }
+
+    };
+    return object3Dlayer;
+}
+function loadGuanFaBuildings2() {
+    var object3Dlayer = new AMap.Object3DLayer();
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "http://59.44.20.201:30101/JJLBS_WEB/JJLBSRESOURCE/Page/LBS/Level5Address/Level5Address.ashx?m=GetBuildingsNotOnMapJNTR");
+    xhr.send();
+    xhr.onload = function () {
+        if (xhr.status != 200) { // analyze HTTP status of the response
+            alert(`Error ${xhr.status}: ${xhr.statusText}`); // e.g. 404: Not Found
+        } else {
+            //var buildingLayer = new AMap.Buildings({ zIndex: 130, merge: false, sort: false, zooms: [17,20]  });
+
+            var buildings = JSON.parse(xhr.response);
+
+            for (var i = 0; i < buildings.length; i++) {
+                var bounds = JSON.parse(buildings[i]["BOUNDS"]);
+                // 创建 Object3D 对象
+                var prism = new AMap.Object3D.Prism({
+                    path: bounds.map(function (coord) {
+                        return new AMap.LngLat(coord[0], coord[1]);
+                    }),
+                    height: buildings[i]["HEIGHT"],
+                    color: 'rgba(255,0,0,0.8)'
+                    //color: 'rgba(153,255,0,0.8)' // 支持 #RRGGBB、rgb()、rgba() 格式数据
+                });
+
+                // 开启透明度支持
+                prism.transparent = true;
+
+                // 添加至 3D 图层
+                object3Dlayer.add(prism);
+
+            }
+
+
+        }
+
+    };
+    return object3Dlayer;
+}
+
+function loadBuildingNames(map) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "http://59.44.20.201:30101/JJLBS_WEB/JJLBSRESOURCE/Page/LBS/Level5Address/Level5Address.ashx?m=GetBuildingsJNSYJYL");
+    xhr.send();
+    xhr.onload = function() {
+        if (xhr.status != 200) { // analyze HTTP status of the response
+            alert(`Error ${xhr.status}: ${xhr.statusText}`); // e.g. 404: Not Found
+        } else {
+            var buildings = JSON.parse(xhr.response);
+            for (var i = 0; i < buildings.length; i++) {
+                var building_name = buildings[i]["NAME"];
+                var lng = buildings[i]["LNG"];
+                var lat = buildings[i]["LAT"];
+                var marker = new AMap.Marker({
+                    icon: "//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png",
+                    position: [lng, lat],
+                    content: building_name
+                });
+                map.add(marker);
+            }
+        }
+    };
+        }
+
+    
+
+
+        //loadBuildings(map);
+           function s(map) {
+    var object3Dlayer = new AMap.Object3DLayer();
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "http://59.44.20.201:30101/JJLBS_WEB/JJLBSRESOURCE/Page/LBS/Level5Address/Level5Address.ashx?m=GetBuildingsNotOnMap");
+    xhr.send();
+    xhr.onload = function () {
+        if (xhr.status != 200) { // analyze HTTP status of the response
+            alert(`Error ${xhr.status}: ${xhr.statusText}`); // e.g. 404: Not Found
+        } else {
+            //var buildingLayer = new AMap.Buildings({ zIndex: 130, merge: false, sort: false, zooms: [17,20]  });
+
+            var buildings = JSON.parse(xhr.response);
+
+            for (var i = 0; i < buildings.length; i++) {
+                        marker = new AMap.Marker({
+            icon: "//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png",
+            position: [buildings[i]["LNG"],buildings[i]["LAT"]],
+                            offset: new AMap.Pixel(-13, -30),
+                            title: `${buildings[i]["LNG"]},${buildings[i]["LAT"]},${buildings[i]["BOUNDS"]},${buildings[i]["BUILDING_ID"]}`,
+                            label: {content:`${buildings[i]["BUILDING_ID"]}`}
+                        });
+                marker.on('click', function (e) {
+                })
+                marker.setMap(map);
+
+
+                var bounds = JSON.parse(buildings[i]["BOUNDS"]);
+                // 创建 Object3D 对象
+                var prism = new AMap.Object3D.Prism({
+                    path: bounds.map(function (coord) {
+                        return new AMap.LngLat(coord[0], coord[1]);
+                    }),
+                    height: buildings[i]["HEIGHT"],
+                    color: 'rgba(112,128,144,1)' // 支持 #RRGGBB、rgb()、rgba() 格式数据
+
+                });
+
+                // 开启透明度支持
+                prism.transparent = true;
+
+                // 添加至 3D 图层
+                object3Dlayer.add(prism);
+
+            }
+            map.add(object3Dlayer);
+            object3Dlayer.hide();
+            map.on("zoomchange", function (e) {
+                var zoom = map.getZoom();
+                if (zoom >= 17) {
+                    object3Dlayer.show();
+                } else {
+                    object3Dlayer.hide();
+                }
+            });
+        }
+    };
+
+
+        }
+
+        function s2() {
+    var object3Dlayer = new AMap.Object3DLayer();
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "http://59.44.20.201:30101/JJLBS_WEB/JJLBSRESOURCE/Page/LBS/Level5Address/Level5Address.ashx?m=GetBuildingsNotOnMapJNTR");
+    xhr.send();
+    xhr.onload = function () {
+        if (xhr.status != 200) { // analyze HTTP status of the response
+            alert(`Error ${xhr.status}: ${xhr.statusText}`); // e.g. 404: Not Found
+        } else {
+            //var buildingLayer = new AMap.Buildings({ zIndex: 130, merge: false, sort: false, zooms: [17,20]  });
+
+            var buildings = JSON.parse(xhr.response);
+
+            for (var i = 0; i < buildings.length; i++) {
+                                    marker = new AMap.Marker({
+            icon: "//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png",
+            position: [buildings[i]["LNG"],buildings[i]["LAT"]],
+            offset: new AMap.Pixel(-13, -30)
+        });
+                marker.setMap(map);
+
+                var bounds = JSON.parse(buildings[i]["BOUNDS"]);
+                // 创建 Object3D 对象
+                var prism = new AMap.Object3D.Prism({
+                    path: bounds.map(function (coord) {
+                        return new AMap.LngLat(coord[0], coord[1]);
+                    }),
+                    height: buildings[i]["HEIGHT"],
+                    color: 'rgba(255,0,0,0.8)'
+                    //color: 'rgba(153,255,0,0.8)' // 支持 #RRGGBB、rgb()、rgba() 格式数据
+                });
+
+                // 开启透明度支持
+                prism.transparent = true;
+
+                // 添加至 3D 图层
+                object3Dlayer.add(prism);
+
+            }
+
+
+        }
+
+    };
+    return object3Dlayer;
+}
+
+        s(map);
+        //map.add(s2());
+    </script>
+</body>
+</html>

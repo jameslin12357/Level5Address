@@ -1,0 +1,3055 @@
+//using JJLBS_Common;
+//using Newtonsoft.Json;
+//using System;
+//using System.Collections.Generic;
+//using System.Data;
+//using System.Linq;
+//using System.Web;
+
+//namespace JJLBS_Web.JJLBSResource.Page.LBS.Level5Address
+//{
+//    /// <summary>
+//    /// Level5Address1 的摘要说明
+//    /// </summary>
+//    public class Level5Address1 : IHttpHandler
+//    {
+
+//        public void ProcessRequest(HttpContext context)
+//        {
+//            context.Response.ContentType = "application/json";
+//            if (context.Request.HttpMethod.ToLower() == "get")
+//            {
+//                if (context.Request.QueryString["m"] == "GetBuildings")
+//                {
+//                    context.Response.Write(GetBuildings(context));
+//                }
+//                if (context.Request.QueryString["m"] == "GetBuildingsPaginated")
+//                {
+//                    context.Response.Write(GetBuildingsPaginated(context));
+//                }
+//                if (context.Request.QueryString["m"] == "IndexByCity")
+//                {
+//                    context.Response.Write(IndexByCity(context));
+//                }
+//                if (context.Request.QueryString["m"] == "IndexByRegion")
+//                {
+//                    context.Response.Write(IndexByRegion(context));
+//                }
+//                if (context.Request.QueryString["m"] == "SearchByRegion")
+//                {
+//                    context.Response.Write(SearchByRegion(context));
+//                }
+//                if (context.Request.QueryString["m"] == "SearchByCity")
+//                {
+//                    context.Response.Write(SearchByCity(context));
+//                }
+//                if (context.Request.QueryString["m"] == "regionexists")
+//                {
+//                    context.Response.Write(regionexists(context));
+//                }
+//                if (context.Request.QueryString["m"] == "DetailsVillage")
+//                {
+//                    context.Response.Write(DetailsVillage(context));
+//                }
+//                if (context.Request.QueryString["m"] == "GetBuildingsPaginatedSearch")
+//                {
+//                    context.Response.Write(GetBuildingsPaginatedSearch(context));
+//                }
+//                if (context.Request.QueryString["m"] == "regionexists2")
+//                {
+//                    context.Response.Write(regionexists2(context));
+//                }
+//                if (context.Request.QueryString["m"] == "DetailsBuilding")
+//                {
+//                    context.Response.Write(DetailsBuilding(context));
+//                }
+//                //if (context.Request.QueryString["m"] == "IndexByCityRegionHasBuildings")
+//                //{
+//                //    context.Response.Write(IndexByCityRegionHasBuildings(context));
+//                //}
+//                //if (context.Request.QueryString["m"] == "IndexByCityRegionHasBounds")
+//                //{
+//                //    context.Response.Write(IndexByCityRegionHasBounds(context));
+//                //}
+//                if (context.Request.QueryString["m"] == "IndexByCityRegionHasBuildingsBounds")
+//                {
+//                    context.Response.Write(IndexByCityRegionHasBuildingsBounds(context));
+//                }
+//                if (context.Request.QueryString["m"] == "IndexByCityRegion")
+//                {
+//                    context.Response.Write(IndexByCityRegion(context));
+//                }
+
+
+//            }
+//            if (context.Request.HttpMethod.ToLower() == "post")
+//            {
+//                if (context.Request.QueryString["m"] == "CreateVillages")
+//                {
+//                    context.Response.Write(CreateVillages(context));
+//                }
+//                if (context.Request.QueryString["m"] == "CreateVillage")
+//                {
+//                    context.Response.Write(CreateVillage(context));
+//                }
+//                if (context.Request.QueryString["m"] == "EditVillageBounds")
+//                {
+//                    context.Response.Write(EditVillageBounds(context));
+//                }
+//                if (context.Request.QueryString["m"] == "DeleteVillage")
+//                {
+//                    context.Response.Write(DeleteVillage(context));
+//                }
+//                if (context.Request.QueryString["m"] == "CreateBuildings")
+//                {
+//                    context.Response.Write(CreateBuildings(context));
+//                }
+//                if (context.Request.QueryString["m"] == "CreateBuilding")
+//                {
+//                    context.Response.Write(CreateBuilding(context));
+//                }
+//                if (context.Request.QueryString["m"] == "EditBuilding")
+//                {
+//                    context.Response.Write(EditBuilding(context));
+//                }
+//                if (context.Request.QueryString["m"] == "DeleteBuilding")
+//                {
+//                    context.Response.Write(DeleteBuilding(context));
+//                }
+//            }
+//        }
+
+
+//        /// <summary>
+//        /// 获取小区相关楼宇
+//        /// </summary>
+//        /// <param name="villageid"></param>
+//        /// <returns></returns>
+//        public string GetBuildings(HttpContext context)
+//        {
+//            string villageid = context.Request["villageid"];
+//            if (villageid == null)
+//            {
+//                return "404";
+//            }
+//            DataSet data = OraHelper.ExecuteDataSet($"select * from lbs_building where village_id = '{villageid}'");
+//            string json = JsonConvert.SerializeObject(data);
+//            json = json.Substring(9, json.Length - 10);
+
+//            return json;
+//        }
+
+
+
+
+//        /// <summary>
+//        /// 获取小区相关楼宇(分页)
+//        /// </summary>
+//        /// <param name="villageid"></param>
+//        /// <returns></returns>
+//        public string GetBuildingsPaginated(HttpContext context)
+//        {
+//            string page = context.Request["page"];
+//            string rows = context.Request["rows"];
+//            string villageid = context.Request["villageid"];
+//            var pageInt = int.Parse(page);
+//            var rowsInt = int.Parse(rows);
+//            var start = (pageInt * rowsInt) - rowsInt;
+//            var end = pageInt * rowsInt;
+//            if (villageid == null)
+//            {
+//                return "404";
+//            }
+//            DataSet data = OraHelper.ExecuteDataSet($"select * from(select r.*, rownum as rn from(select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, REGION, TYPE, LNG, LAT, VILLAGE_ID, BLUELABEL from lbs_building lb  where lb.village_id = '{villageid}' order by create_date desc) r) rtwo where rtwo.rn > {start} and rtwo.rn <= {end}");
+//            DataSet dataCount = OraHelper.ExecuteDataSet($"select count(*) as total from lbs_building lb where lb.village_id = '{villageid}'");
+//            //DataSet data = ohp.Query($"select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS, (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv where lv.village_region like '%{city}%'");
+//            //DataSet data2 = ohp.Query($"select * from lbs_building");
+//            //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id = (select village_id from lbs_village lv where lv.village_name = '元电职工住宅A区')");
+//            //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.region like '%{city}%'");
+//            //DataSet data3 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id in (select village_id from lbs_village lv where rownum<2 and lv.village_region like '%{city}%' )");
+//            int count = int.Parse(dataCount.Tables[0].Rows[0].ItemArray[0].ToString());
+//            string json = JsonConvert.SerializeObject(data);
+//            json = json.Substring(9, json.Length - 10);
+//            string jsonf = "{\"total\":" + count + ",\"rows\":" + json + "}";
+//            ////var result = new { total = count, rows = json };
+//            ////return JsonConvert.SerializeObject(result);
+//            return jsonf;
+//        }
+
+//        /// <summary>
+//        /// 下拉框获取城市数据
+//        /// </summary>
+//        /// <param name="page"></param>
+//        /// <param name="rows"></param>
+//        /// <param name="city"></param>
+//        /// <returns></returns>
+//        public string IndexByCity(HttpContext context)
+//        {
+//            string page = context.Request["page"];
+//            string rows = context.Request["rows"];
+//            string city = context.Request["city"];
+//            var pageInt = int.Parse(page);
+//            var rowsInt = int.Parse(rows);
+//            var start = (pageInt * rowsInt) - rowsInt;
+//            var end = pageInt * rowsInt;
+//            // say page = 5 and rows = 10
+//            // limit = 10 and offset = (page - 1)*rows
+//            // say page = 1 and rows = 10
+//            // limit = 10 and offset = (page - 1)*rows
+//            if (city == null)
+//            {
+//                return "404";
+//            }
+//            DataSet data = OraHelper.ExecuteDataSet($"select * from(select r.*, rownum as rn from(select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS,  (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv  where lv.village_region like '%{city}%' order by create_date desc) r) rtwo where rtwo.rn > {start} and rtwo.rn <= {end}");
+//            DataSet dataCount = OraHelper.ExecuteDataSet($"select count(*) as total from lbs_village lv where lv.village_region like '%{city}%'");
+//            //DataSet data = ohp.Query($"select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS, (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv where lv.village_region like '%{city}%'");
+//            //DataSet data2 = ohp.Query($"select * from lbs_building");
+//            //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id = (select village_id from lbs_village lv where lv.village_name = '元电职工住宅A区')");
+//            //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.region like '%{city}%'");
+//            //DataSet data3 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id in (select village_id from lbs_village lv where rownum<2 and lv.village_region like '%{city}%' )");
+//            int count = int.Parse(dataCount.Tables[0].Rows[0].ItemArray[0].ToString());
+//            string json = JsonConvert.SerializeObject(data);
+//            json = json.Substring(9, json.Length - 10);
+//            string jsonf = "{\"total\":" + count + ",\"rows\":" + json + "}";
+//            ////var result = new { total = count, rows = json };
+//            ////return JsonConvert.SerializeObject(result);
+//            return jsonf;
+
+//        }
+
+//        /// <summary>
+//        /// 下拉框获取区县数据
+//        /// </summary>
+//        /// <param name="page"></param>
+//        /// <param name="rows"></param>
+//        /// <param name="region"></param>
+//        /// <returns></returns>
+//        public string IndexByRegion(HttpContext context)
+//        {
+//            string page = context.Request["page"];
+//            string rows = context.Request["rows"];
+//            string region = context.Request["region"];
+//            var pageInt = int.Parse(page);
+//            var rowsInt = int.Parse(rows);
+//            var start = (pageInt * rowsInt) - rowsInt;
+//            var end = pageInt * rowsInt;
+//            if (region == null)
+//            {
+//                return "404";
+//            }
+//            DataSet data =OraHelper.ExecuteDataSet($"select * from(select r.*, rownum as rn from(select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS,  (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv  where lv.village_region like '%{region}%' order by create_date desc) r) rtwo where rtwo.rn > {start} and rtwo.rn <= {end}");
+//            DataSet dataCount = OraHelper.ExecuteDataSet($"select count(*) as total from lbs_village lv where lv.village_region like '%{region}%'");
+//            //DataSet data = ohp.Query($"select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS, (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv where lv.village_region like '%{city}%'");
+//            //DataSet data2 = ohp.Query($"select * from lbs_building");
+//            //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id = (select village_id from lbs_village lv where lv.village_name = '元电职工住宅A区')");
+//            //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.region like '%{city}%'");
+//            //DataSet data3 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id in (select village_id from lbs_village lv where rownum<2 and lv.village_region like '%{city}%' )");
+//            int count = int.Parse(dataCount.Tables[0].Rows[0].ItemArray[0].ToString());
+//            string json = JsonConvert.SerializeObject(data);
+//            json = json.Substring(9, json.Length - 10);
+//            string jsonf = "{\"total\":" + count + ",\"rows\":" + json + "}";
+//            //var result = new { total = count, rows = json };
+//            //return JsonConvert.SerializeObject(result);
+//            return jsonf;
+//        }
+
+//        /// <summary>
+//        /// 搜索小区(按区县)
+//        /// </summary>
+//        /// <param name="text"></param>
+//        /// <param name="region"></param>
+//        /// <returns></returns>
+//        public string SearchByRegion(HttpContext context)
+//        {
+//            string page = context.Request["page"];
+//            string rows = context.Request["rows"];
+//            string text = context.Request["text"];
+//            string region = context.Request["region"];
+//            var pageInt = int.Parse(page);
+//            var rowsInt = int.Parse(rows);
+//            var start = (pageInt * rowsInt) - rowsInt;
+//            var end = pageInt * rowsInt;
+//            if (text == "")
+//            {
+//                DataSet data = OraHelper.ExecuteDataSet($"select * from(select r.*, rownum as rn from(select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS,  (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv  where lv.village_region like '%{region}%' order by create_date desc) r) rtwo where rtwo.rn > {start} and rtwo.rn <= {end}");
+//                DataSet dataCount = OraHelper.ExecuteDataSet($"select count(*) as total from lbs_village lv where lv.village_region like '%{region}%'");
+//                //DataSet data = ohp.Query($"select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS, (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv where lv.village_region like '%{city}%'");
+//                //DataSet data2 = ohp.Query($"select * from lbs_building");
+//                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id = (select village_id from lbs_village lv where lv.village_name = '元电职工住宅A区')");
+//                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.region like '%{city}%'");
+//                //DataSet data3 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id in (select village_id from lbs_village lv where rownum<2 and lv.village_region like '%{city}%' )");
+//                int count = int.Parse(dataCount.Tables[0].Rows[0].ItemArray[0].ToString());
+//                string json = JsonConvert.SerializeObject(data);
+//                json = json.Substring(9, json.Length - 10);
+//                string jsonf = "{\"total\":" + count + ",\"rows\":" + json + "}";
+//                //var result = new { total = count, rows = json };
+//                //return JsonConvert.SerializeObject(result);
+//                return jsonf;
+//            }
+//            else
+//            {
+//                DataSet data = OraHelper.ExecuteDataSet($"select * from(select r.*, rownum as rn from(select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS,  (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv  where lv.village_region like '%{region}%' and lv.village_name like '%{text}%' order by create_date desc) r) rtwo where rtwo.rn > {start} and rtwo.rn <= {end}");
+//                DataSet dataCount = OraHelper.ExecuteDataSet($"select count(*) as total from lbs_village lv where lv.village_region like '%{region}%' and lv.village_name like '%{text}%'");
+//                //DataSet data = ohp.Query($"select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS, (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv where lv.village_region like '%{city}%'");
+//                //DataSet data2 = ohp.Query($"select * from lbs_building");
+//                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id = (select village_id from lbs_village lv where lv.village_name = '元电职工住宅A区')");
+//                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.region like '%{city}%'");
+//                //DataSet data3 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id in (select village_id from lbs_village lv where rownum<2 and lv.village_region like '%{city}%' )");
+//                int count = int.Parse(dataCount.Tables[0].Rows[0].ItemArray[0].ToString());
+//                string json = JsonConvert.SerializeObject(data);
+//                json = json.Substring(9, json.Length - 10);
+//                string jsonf = "{\"total\":" + count + ",\"rows\":" + json + "}";
+//                //var result = new { total = count, rows = json };
+//                //return JsonConvert.SerializeObject(result);
+//                return jsonf;
+//            }
+
+//        }
+
+
+//        /// <summary>
+//        /// 搜索小区(按城市)
+//        /// </summary>
+//        /// <param name="page"></param>
+//        /// <param name="rows"></param>
+//        /// <param name="region"></param>
+//        /// <returns></returns>
+//        public string SearchByCity(HttpContext context)
+//        {
+//            string page = context.Request["page"];
+//            string rows = context.Request["rows"];
+//            string text = context.Request["text"];
+//            string city = context.Request["city"];
+//            var pageInt = int.Parse(page);
+//            var rowsInt = int.Parse(rows);
+//            var start = (pageInt * rowsInt) - rowsInt;
+//            var end = pageInt * rowsInt;
+//            if (text == "")
+//            {
+//                DataSet data = OraHelper.ExecuteDataSet($"select * from(select r.*, rownum as rn from(select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS,  (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv  where lv.village_region like '%{city}%' order by create_date desc) r) rtwo where rtwo.rn > {start} and rtwo.rn <= {end}");
+//                DataSet dataCount = OraHelper.ExecuteDataSet($"select count(*) as total from lbs_village lv where lv.village_region like '%{city}%'");
+//                //DataSet data = ohp.Query($"select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS, (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv where lv.village_region like '%{city}%'");
+//                //DataSet data2 = ohp.Query($"select * from lbs_building");
+//                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id = (select village_id from lbs_village lv where lv.village_name = '元电职工住宅A区')");
+//                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.region like '%{city}%'");
+//                //DataSet data3 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id in (select village_id from lbs_village lv where rownum<2 and lv.village_region like '%{city}%' )");
+//                int count = int.Parse(dataCount.Tables[0].Rows[0].ItemArray[0].ToString());
+//                string json = JsonConvert.SerializeObject(data);
+//                json = json.Substring(9, json.Length - 10);
+//                string jsonf = "{\"total\":" + count + ",\"rows\":" + json + "}";
+//                //var result = new { total = count, rows = json };
+//                //return JsonConvert.SerializeObject(result);
+//                return jsonf;
+//            }
+//            else
+//            {
+//                DataSet data = OraHelper.ExecuteDataSet($"select * from(select r.*, rownum as rn from(select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS,  (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv  where lv.village_region like '%{city}%' and lv.village_name like '%{text}%' order by create_date desc) r) rtwo where rtwo.rn > {start} and rtwo.rn <= {end}");
+//                DataSet dataCount = OraHelper.ExecuteDataSet($"select count(*) as total from lbs_village lv where lv.village_region like '%{city}%' and lv.village_name like '%{text}%'");
+//                //DataSet data = ohp.Query($"select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS, (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv where lv.village_region like '%{city}%'");
+//                //DataSet data2 = ohp.Query($"select * from lbs_building");
+//                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id = (select village_id from lbs_village lv where lv.village_name = '元电职工住宅A区')");
+//                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.region like '%{city}%'");
+//                //DataSet data3 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id in (select village_id from lbs_village lv where rownum<2 and lv.village_region like '%{city}%' )");
+//                int count = int.Parse(dataCount.Tables[0].Rows[0].ItemArray[0].ToString());
+//                string json = JsonConvert.SerializeObject(data);
+//                json = json.Substring(9, json.Length - 10);
+//                string jsonf = "{\"total\":" + count + ",\"rows\":" + json + "}";
+//                //var result = new { total = count, rows = json };
+//                //return JsonConvert.SerializeObject(result);
+//                return jsonf;
+//            }
+
+//        }
+
+//        /// <summary>
+//        /// 区县是否存在
+//        /// </summary>
+//        /// <param name="region"></param>
+//        /// <returns></returns>
+//        public string regionexists(HttpContext context)
+//        {
+//            string region = context.Request["region"];
+//            if (region == null)
+//            {
+//                return "404";
+//            }
+//            DataSet data = OraHelper.ExecuteDataSet($"select count(*) as count from lbs_village where village_region = '{region}'");
+//            string json = JsonConvert.SerializeObject(data);
+//            return json;
+   
+
+//        }
+
+
+//        /// <summary>
+//        /// 添加小区批量
+//        /// </summary>
+//        /// <param></param>
+//        /// <returns></returns>
+//        public string CreateVillages(HttpContext context)
+//        {
+            
+//            string village_code = context.Request.Form["village_code"];
+//            string village_name = context.Request.Form["village_name"];
+//            string village_address = context.Request.Form["village_address"];
+//            string village_region = context.Request.Form["village_region"];
+//            string village_type = context.Request.Form["village_type"];
+//            string village_x = context.Request.Form["village_x"];
+//            string village_y = context.Request.Form["village_y"];
+//            string village_lng = context.Request.Form["village_lng"];
+//            string village_lat = context.Request.Form["village_lat"];
+//            string source = context.Request.Form["source"];
+//            DataSet data = OraHelper.ExecuteDataSet($"begin insert into lbs_village (village_code, village_name, village_address, village_region, village_type, village_x, village_y, village_lng, village_lat, source) values ('{village_code}','{village_name}','{village_address}','{village_region}','{village_type}','{village_x}','{village_y}','{village_lng}','{village_lat}','{source}');commit;end;");
+//            return "[]";
+
+
+//        }
+
+//        /// <summary>
+//        /// 添加小区
+//        /// </summary>
+//        /// <param></param>
+//        /// <returns></returns>
+//        public string CreateVillage(HttpContext context)
+//        {
+//            string village_name = context.Request.Form["village_name"];
+//            string village_address = context.Request.Form["village_address"];
+//            string village_region = context.Request.Form["village_region"];
+//            string village_type = context.Request.Form["village_type"];
+//            string village_bounds = context.Request.Form["village_bounds"];
+//            string village_x = context.Request.Form["village_x"];
+//            string village_y = context.Request.Form["village_y"];
+//            string village_lng = context.Request.Form["village_lng"];
+//            string village_lat = context.Request.Form["village_lat"];
+//            string source = context.Request.Form["source"];
+//            List<string> errors = new List<string>();
+//            if (village_name.Length == 0)
+//            {
+//                errors.Add("小区名称不能为空");
+//            }
+//            if (village_address.Length == 0)
+//            {
+//                errors.Add("详细地址不能为空");
+//            }
+//            if (village_region.Length == 0)
+//            {
+//                errors.Add("区域不能为空");
+//            }
+//            if (village_type.Length == 0)
+//            {
+//                errors.Add("类型不能为空");
+//            }
+//            if (village_bounds.Length == 0)
+//            {
+//                errors.Add("小区边界不能为空");
+//            }
+//            if (village_x.Length == 0)
+//            {
+//                errors.Add("小区经度不能为空");
+//            }
+//            if (village_y.Length == 0)
+//            {
+//                errors.Add("小区纬度不能为空");
+//            }
+//            if (village_lng.Length == 0)
+//            {
+//                errors.Add("小区经度不能为空");
+//            }
+//            if (village_lng.Length == 0)
+//            {
+//                errors.Add("小区纬度不能为空");
+//            }
+//            if (source.Length == 0)
+//            {
+//                errors.Add("小区来源不能为空");
+//            }
+//            if (errors.Count > 0)
+//            {
+//                return JsonConvert.SerializeObject(errors);
+//            }
+//            else
+//            {
+//                DataSet data = OraHelper.ExecuteDataSet($"begin insert into lbs_village (village_name, village_address, village_region, village_type, village_bounds, village_x, village_y, village_lng, village_lat, source) values ('{village_name}','{village_address}','{village_region}','{village_type}', '{village_bounds}','{village_x}','{village_y}','{village_lng}','{village_lat}','{source}');commit;end;");
+//                return "[]";
+//            }
+
+
+//        }
+
+//        /// <summary>
+//        /// 小区详情
+//        /// </summary>
+//        /// <param></param>
+//        /// <returns></returns>
+//        public string DetailsVillage(HttpContext context)
+//        {
+//            string id = context.Request["id"];
+//            if (id == null)
+//            {
+//                return "404";
+//            }
+//            DataSet data = OraHelper.ExecuteDataSet($"select * from lbs_village where VILLAGE_ID = '{id}'");
+//            if (data.Tables.Count == 0)
+//            {
+//                return "404";
+//            }
+//            string json = JsonConvert.SerializeObject(data);
+//            return json;
+//        }
+
+
+//        /// <summary>
+//        /// 编辑小区
+//        /// </summary>
+//        /// <param></param>
+//        /// <returns></returns>
+//        public string EditVillageBounds(HttpContext context)
+//        {
+//            string id = context.Request["id"];
+//            if (id == null)
+//            {
+//                return "404";
+//            }
+//            string village_name = context.Request.Form["village_name"];
+//            string village_address = context.Request.Form["village_address"];
+//            string village_region = context.Request.Form["village_region"];
+//            string village_type = context.Request.Form["village_type"];
+//            string village_bounds = context.Request.Form["village_bounds"];
+//            List<string> errors = new List<string>();
+//            if (village_name.Length == 0)
+//            {
+//                errors.Add("小区名称不能为空");
+//            }
+//            if (village_address.Length == 0)
+//            {
+//                errors.Add("详细地址不能为空");
+//            }
+//            if (village_region.Length == 0)
+//            {
+//                errors.Add("区域不能为空");
+//            }
+//            if (village_type.Length == 0)
+//            {
+//                errors.Add("类型不能为空");
+//            }
+//            if (village_bounds.Length == 0)
+//            {
+//                errors.Add("边界不能为空");
+//            }
+//            if (errors.Count > 0)
+//            {
+//                return JsonConvert.SerializeObject(errors);
+//            }
+//            else
+//            {
+//                DataSet data = OraHelper.ExecuteDataSet($"begin update lbs_village set village_name ='{village_name}',village_address='{village_address}',village_region='{village_region}',village_type='{village_type}',village_bounds='{village_bounds}' where village_id = '{id}';commit;end;");
+//                return "[]";
+//            }
+//        }
+
+//        /// <summary>
+//        /// 删除小区
+//        /// </summary>
+//        /// <param></param>
+//        /// <returns></returns>
+//        public string DeleteVillage(HttpContext context)
+//        {
+//            string id = context.Request["id"];
+//            if (id == null)
+//            {
+//                return "404";
+//            }
+//            DataSet data = OraHelper.ExecuteDataSet($"begin delete from lbs_village where village_id = '{id}';commit;end;");
+//            return "[]";
+//        }
+
+
+//        /// <summary>
+//        /// 搜索楼宇(按小区)
+//        /// </summary>
+//        /// <param name="page"></param>
+//        /// <param name="rows"></param>
+//        /// <param name="text"></param>
+//        /// <param name="villageid"></param>
+//        /// <returns></returns>
+//        public string GetBuildingsPaginatedSearch(HttpContext context)
+//        {
+//            string page = context.Request["page"];
+//            string rows = context.Request["rows"];
+//            string text = context.Request["text"];
+//            string villageid = context.Request["villageid"];
+//            var pageInt = int.Parse(page);
+//            var rowsInt = int.Parse(rows);
+//            var start = (pageInt * rowsInt) - rowsInt;
+//            var end = pageInt * rowsInt;
+//            if (text == "")
+//            {
+//                DataSet data = OraHelper.ExecuteDataSet($"select * from(select r.*, rownum as rn from(select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, REGION, TYPE, LNG, LAT, VILLAGE_ID, BLUELABEL from lbs_building lb  where lb.village_id = '{villageid}' order by create_date desc) r) rtwo where rtwo.rn > {start} and rtwo.rn <= {end}");
+//                DataSet dataCount = OraHelper.ExecuteDataSet($"select count(*) as total from lbs_building lb where lb.village_id = '{villageid}'");
+//                //DataSet data = ohp.Query($"select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS, (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv where lv.village_region like '%{city}%'");
+//                //DataSet data2 = ohp.Query($"select * from lbs_building");
+//                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id = (select village_id from lbs_village lv where lv.village_name = '元电职工住宅A区')");
+//                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.region like '%{city}%'");
+//                //DataSet data3 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id in (select village_id from lbs_village lv where rownum<2 and lv.village_region like '%{city}%' )");
+//                int count = int.Parse(dataCount.Tables[0].Rows[0].ItemArray[0].ToString());
+//                string json = JsonConvert.SerializeObject(data);
+//                json = json.Substring(9, json.Length - 10);
+//                string jsonf = "{\"total\":" + count + ",\"rows\":" + json + "}";
+//                //var result = new { total = count, rows = json };
+//                //return JsonConvert.SerializeObject(result);
+//                return jsonf;
+//            }
+//            else
+//            {
+//                DataSet data = OraHelper.ExecuteDataSet($"select * from(select r.*, rownum as rn from(select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, REGION, TYPE, LNG, LAT, VILLAGE_ID, BLUELABEL from lbs_building lb  where lb.village_id = '{villageid}'  and lb.building_name like '%{text}%' order by create_date desc) r) rtwo where rtwo.rn > {start} and rtwo.rn <= {end}");
+//                DataSet dataCount = OraHelper.ExecuteDataSet($"select count(*) as total from lbs_building lb where lb.village_id = '{villageid}' and lb.building_name like '%{text}%'");
+//                //DataSet data = ohp.Query($"select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS, (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv where lv.village_region like '%{city}%'");
+//                //DataSet data2 = ohp.Query($"select * from lbs_building");
+//                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id = (select village_id from lbs_village lv where lv.village_name = '元电职工住宅A区')");
+//                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.region like '%{city}%'");
+//                //DataSet data3 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id in (select village_id from lbs_village lv where rownum<2 and lv.village_region like '%{city}%' )");
+//                int count = int.Parse(dataCount.Tables[0].Rows[0].ItemArray[0].ToString());
+//                string json = JsonConvert.SerializeObject(data);
+//                json = json.Substring(9, json.Length - 10);
+//                string jsonf = "{\"total\":" + count + ",\"rows\":" + json + "}";
+//                //var result = new { total = count, rows = json };
+//                //return JsonConvert.SerializeObject(result);
+//                return jsonf;
+//            }
+//        }
+
+
+//        /// <summary>
+//        /// 区县是否存在2
+//        /// </summary>
+//        /// <param name="region"></param>
+//        /// <returns></returns>
+//        public string regionexists2(HttpContext context)
+//        {
+//            string region = context.Request["region"];
+//            if (region == null)
+//            {
+//                return "404";
+//            }
+//            DataSet data = OraHelper.ExecuteDataSet($"select count(*) as count from lbs_building where region = '{region}'");
+//            string json = JsonConvert.SerializeObject(data);
+//            return json;
+//        }
+
+//        /// <summary>
+//        /// 添加楼宇批量
+//        /// </summary>
+//        /// <param></param>
+//        /// <returns></returns>
+//        public string CreateBuildings(HttpContext context)
+//        {
+
+//            string building_code = context.Request.Form["building_code"];
+//            string building_number = context.Request.Form["building_number"];
+//            string building_name = context.Request.Form["building_name"];
+//            string building_address = context.Request.Form["building_address"];
+//            string building_region = context.Request.Form["building_region"];
+//            string building_type = context.Request.Form["building_type"];
+//            string building_x = context.Request.Form["building_x"];
+//            string building_y = context.Request.Form["building_y"];
+//            string building_lng = context.Request.Form["building_lng"];
+//            string building_lat = context.Request.Form["building_lat"];
+//            string village_id = context.Request.Form["village_id"];
+//            string source = context.Request.Form["source"];
+//            DataSet data = OraHelper.ExecuteDataSet($"begin insert into lbs_building (code, building_number, building_name, building_address, region, type, x, y, lng, lat, village_id, source) values ('{building_code}','{building_number}','{building_name}','{building_address}','{building_region}','{building_type}','{building_x}','{building_y}','{building_lng}','{building_lat}',(select village_id from lbs_village where village_code = '{village_id}' and rownum<2),'{source}');commit;end;");
+//            return "[]";
+
+
+//        }
+
+
+//        /// <summary>
+//        /// 添加楼宇
+//        /// </summary>
+//        /// <param></param>
+//        /// <returns></returns>
+//        public string CreateBuilding(HttpContext context)
+//        {
+//            string building_number = context.Request.Form["building_number"];
+//            string building_name = context.Request.Form["building_name"];
+//            string building_address = context.Request.Form["building_address"];
+//            string bluelabel = context.Request.Form["bluelabel"];
+//            string building_region = context.Request.Form["building_region"];
+//            string building_type = context.Request.Form["building_type"];
+//            string building_lng = context.Request.Form["building_lng"];
+//            string building_lat = context.Request.Form["building_lat"];
+//            string village_id = context.Request.Form["village_id"];
+//            //string building_bounds = HttpContext.Request.Form["building_bounds"];
+//            //string building_x = HttpContext.Request.Form["building_x"];
+//            //string building_y = HttpContext.Request.Form["building_y"];
+//            //string building_lng = HttpContext.Request.Form["building_lng"];
+//            //string building_lat = HttpContext.Request.Form["building_lat"];
+//            string source = context.Request.Form["source"];
+//            List<string> errors = new List<string>();
+//            if (building_number.Length == 0)
+//            {
+//                errors.Add("楼宇号码不能为空");
+//            }
+//            if (building_name.Length == 0)
+//            {
+//                errors.Add("楼宇名称不能为空");
+//            }
+//            if (building_address.Length == 0)
+//            {
+//                errors.Add("详细地址不能为空");
+//            }
+//            if (bluelabel.Length == 0)
+//            {
+//                errors.Add("蓝牌地址码不能为空");
+//            }
+//            if (building_region.Length == 0)
+//            {
+//                errors.Add("区域不能为空");
+//            }
+//            if (building_type.Length == 0)
+//            {
+//                errors.Add("类型不能为空");
+//            }
+//            //if (building_bounds.Length == 0)
+//            //{
+//            //    errors.Add("楼宇边界不能为空");
+//            //}
+//            if (building_lng.Length == 0)
+//            {
+//                errors.Add("楼宇经度不能为空");
+//            }
+//            if (building_lat.Length == 0)
+//            {
+//                errors.Add("楼宇纬度不能为空");
+//            }
+//            if (village_id.Length == 0)
+//            {
+//                errors.Add("小区ID不能为空");
+//            }
+//            if (source.Length == 0)
+//            {
+//                errors.Add("楼宇来源不能为空");
+//            }
+//            if (errors.Count > 0)
+//            {
+//                return JsonConvert.SerializeObject(errors);
+//            }
+//            else
+//            {
+//                //DataSet data = ohp.Query($"begin insert into lbs_building (building_number, building_name, building_address, region, type, bounds, x, y, lng, lat, source) values ('{building_number}','{building_name}','{building_address}','{building_region}','{building_type}', '{building_bounds}','{building_x}','{building_y}','{building_lat}','{building_lng}','{source}');commit;end;");
+//                DataSet data = OraHelper.ExecuteDataSet($"begin insert into lbs_building (building_number, building_name, building_address, bluelabel, region, type, x, y, lng, lat, village_id, source) values ('{building_number}','{building_name}','{building_address}', '{bluelabel}', '{building_region}','{building_type}', '{building_lng}','{building_lat}','{building_lng}','{building_lat}','{village_id}','{source}');commit;end;");
+
+//                return "[]";
+//            }
+
+
+//        }
+
+
+//        /// <summary>
+//        /// 楼宇详情
+//        /// </summary>
+//        /// <param></param>
+//        /// <returns></returns>
+//        public string DetailsBuilding(HttpContext context)
+//        {
+//            string id = context.Request["id"];
+//            if (id == null)
+//            {
+//                return "404";
+//            }
+//            DataSet data = OraHelper.ExecuteDataSet($"select * from lbs_building where BUILDING_ID = '{id}'");
+//            if (data.Tables.Count == 0)
+//            {
+//                return "404";
+//            }
+//            string json = JsonConvert.SerializeObject(data);
+//            return json;
+//        }
+
+//        /// <summary>
+//        /// 编辑小区
+//        /// </summary>
+//        /// <param></param>
+//        /// <returns></returns>
+//        public string EditBuilding(HttpContext context)
+//        {
+//            string id = context.Request["id"];
+//            if (id == null)
+//            {
+//                return "404";
+//            }
+//            string building_number = context.Request.Form["building_number"];
+//            string building_name = context.Request.Form["building_name"];
+//            string building_address = context.Request.Form["building_address"];
+//            string bluelabel = context.Request.Form["bluelabel"];
+//            string building_region = context.Request.Form["building_region"];
+//            string building_type = context.Request.Form["building_type"];
+//            List<string> errors = new List<string>();
+//            if (building_number.Length == 0)
+//            {
+//                errors.Add("楼宇号码不能为空");
+//            }
+//            if (building_name.Length == 0)
+//            {
+//                errors.Add("楼宇名称不能为空");
+//            }
+//            if (building_address.Length == 0)
+//            {
+//                errors.Add("详细地址不能为空");
+//            }
+//            if (bluelabel.Length == 0)
+//            {
+//                errors.Add("蓝牌地址码不能为空");
+//            }
+//            if (building_region.Length == 0)
+//            {
+//                errors.Add("区域不能为空");
+//            }
+//            if (building_type.Length == 0)
+//            {
+//                errors.Add("类型不能为空");
+//            }
+//            if (errors.Count > 0)
+//            {
+//                return JsonConvert.SerializeObject(errors);
+//            }
+//            else
+//            {
+//                DataSet data = OraHelper.ExecuteDataSet($"begin update lbs_building set building_number ='{building_number}',building_name ='{building_name}',building_address='{building_address}',bluelabel='{bluelabel}',region ='{building_region}',type ='{building_type}' where building_id = '{id}';commit;end;");
+//                return "[]";
+//            }
+//        }
+
+//        /// <summary>
+//        /// 删除楼宇
+//        /// </summary>
+//        /// <param></param>
+//        /// <returns></returns>
+//        public string DeleteBuilding(HttpContext context)
+//        {
+//            string id = context.Request["id"];
+//            if (id == null)
+//            {
+//                return "404";
+//            }
+//            DataSet data = OraHelper.ExecuteDataSet($"begin delete from lbs_building where building_id = '{id}';commit;end;");
+//            return "[]";
+//        }
+
+//        ///// <summary>
+//        ///// 复选框获取带有楼宇小区数据
+//        ///// </summary>
+//        ///// <param name="page"></param>
+//        ///// <param name="rows"></param>
+//        ///// <param name="city"></param>
+//        ///// <returns></returns>
+//        //public string IndexByCityRegionHasBuildings(HttpContext context)
+//        //{
+//        //    string page = context.Request["page"];
+//        //    string rows = context.Request["rows"];
+//        //    string cityregion = context.Request["cityregion"];
+//        //    var pageInt = int.Parse(page);
+//        //    var rowsInt = int.Parse(rows);
+//        //    var start = (pageInt * rowsInt) - rowsInt;
+//        //    var end = pageInt * rowsInt;
+//        //    // say page = 5 and rows = 10
+//        //    // limit = 10 and offset = (page - 1)*rows
+//        //    // say page = 1 and rows = 10
+//        //    // limit = 10 and offset = (page - 1)*rows
+//        //    if (cityregion == null)
+//        //    {
+//        //        return "404";
+//        //    }
+//        //    DataSet data = OraHelper.ExecuteDataSet($"select * from(select r.*, rownum as rn from(select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS,  (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv  where lv.village_region like '%{cityregion}%' and (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) != 0 order by create_date desc) r) rtwo where rtwo.rn > {start} and rtwo.rn <= {end}");
+//        //    DataSet dataCount = OraHelper.ExecuteDataSet($"select count(*) as total from lbs_village lv where lv.village_region like '%{cityregion}%' and (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) != 0");
+//        //    //DataSet data = ohp.Query($"select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS, (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv where lv.village_region like '%{city}%'");
+//        //    //DataSet data2 = ohp.Query($"select * from lbs_building");
+//        //    //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id = (select village_id from lbs_village lv where lv.village_name = '元电职工住宅A区')");
+//        //    //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.region like '%{city}%'");
+//        //    //DataSet data3 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id in (select village_id from lbs_village lv where rownum<2 and lv.village_region like '%{city}%' )");
+//        //    int count = int.Parse(dataCount.Tables[0].Rows[0].ItemArray[0].ToString());
+//        //    string json = JsonConvert.SerializeObject(data);
+//        //    json = json.Substring(9, json.Length - 10);
+//        //    string jsonf = "{\"total\":" + count + ",\"rows\":" + json + "}";
+//        //    ////var result = new { total = count, rows = json };
+//        //    ////return JsonConvert.SerializeObject(result);
+//        //    return jsonf;
+
+//        //}
+
+
+//        ///// <summary>
+//        ///// 复选框获取带有边界小区数据
+//        ///// </summary>
+//        ///// <param name="page"></param>
+//        ///// <param name="rows"></param>
+//        ///// <param name="city"></param>
+//        ///// <returns></returns>
+//        //public string IndexByCityRegionHasBounds(HttpContext context)
+//        //{
+//        //    string page = context.Request["page"];
+//        //    string rows = context.Request["rows"];
+//        //    string cityregion = context.Request["cityregion"];
+//        //    var pageInt = int.Parse(page);
+//        //    var rowsInt = int.Parse(rows);
+//        //    var start = (pageInt * rowsInt) - rowsInt;
+//        //    var end = pageInt * rowsInt;
+//        //    // say page = 5 and rows = 10
+//        //    // limit = 10 and offset = (page - 1)*rows
+//        //    // say page = 1 and rows = 10
+//        //    // limit = 10 and offset = (page - 1)*rows
+//        //    if (cityregion == null)
+//        //    {
+//        //        return "404";
+//        //    }
+//        //    DataSet data = OraHelper.ExecuteDataSet($"select * from(select r.*, rownum as rn from(select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS,  (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv  where lv.village_region like '%{cityregion}%' and lv.village_bounds is not null order by create_date desc) r) rtwo where rtwo.rn > {start} and rtwo.rn <= {end}");
+//        //    DataSet dataCount = OraHelper.ExecuteDataSet($"select count(*) as total from lbs_village lv where lv.village_region like '%{cityregion}%' and lv.village_bounds is not null");
+//        //    //DataSet data = ohp.Query($"select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS, (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv where lv.village_region like '%{city}%'");
+//        //    //DataSet data2 = ohp.Query($"select * from lbs_building");
+//        //    //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id = (select village_id from lbs_village lv where lv.village_name = '元电职工住宅A区')");
+//        //    //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.region like '%{city}%'");
+//        //    //DataSet data3 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id in (select village_id from lbs_village lv where rownum<2 and lv.village_region like '%{city}%' )");
+//        //    int count = int.Parse(dataCount.Tables[0].Rows[0].ItemArray[0].ToString());
+//        //    string json = JsonConvert.SerializeObject(data);
+//        //    json = json.Substring(9, json.Length - 10);
+//        //    string jsonf = "{\"total\":" + count + ",\"rows\":" + json + "}";
+//        //    ////var result = new { total = count, rows = json };
+//        //    ////return JsonConvert.SerializeObject(result);
+//        //    return jsonf;
+
+//        //}
+
+//        /// <summary>
+//        /// //复选框获取带有楼宇边界小区数据
+//        /// </summary>
+//        /// <param name="page"></param>
+//        /// <param name="rows"></param>
+//        /// <param name="city"></param>
+//        /// <returns></returns>
+//        public string IndexByCityRegionHasBuildingsBounds(HttpContext context)
+//        {
+//            string page = context.Request["page"];
+//            string rows = context.Request["rows"];
+//            string cityregion = context.Request["cityregion"];
+//            string stateFinal = context.Request["stateFinal"];
+//            var pageInt = int.Parse(page);
+//            var rowsInt = int.Parse(rows);
+//            var start = (pageInt * rowsInt) - rowsInt;
+//            var end = pageInt * rowsInt;
+//            // say page = 5 and rows = 10
+//            // limit = 10 and offset = (page - 1)*rows
+//            // say page = 1 and rows = 10
+//            // limit = 10 and offset = (page - 1)*rows
+//            if (cityregion == null)
+//            {
+//                return "404";
+//            }
+//            if (stateFinal == "1")
+//            {
+//                DataSet data = OraHelper.ExecuteDataSet($"select * from(select r.*, rownum as rn from(select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS,  (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv  where lv.village_region like '%{cityregion}%' and (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) != 0 order by create_date desc) r) rtwo where rtwo.rn > {start} and rtwo.rn <= {end}");
+//                DataSet dataCount = OraHelper.ExecuteDataSet($"select count(*) as total from lbs_village lv where lv.village_region like '%{cityregion}%' and (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) != 0");
+//                //DataSet data = ohp.Query($"select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS, (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv where lv.village_region like '%{city}%'");
+//                //DataSet data2 = ohp.Query($"select * from lbs_building");
+//                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id = (select village_id from lbs_village lv where lv.village_name = '元电职工住宅A区')");
+//                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.region like '%{city}%'");
+//                //DataSet data3 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id in (select village_id from lbs_village lv where rownum<2 and lv.village_region like '%{city}%' )");
+//                int count = int.Parse(dataCount.Tables[0].Rows[0].ItemArray[0].ToString());
+//                string json = JsonConvert.SerializeObject(data);
+//                json = json.Substring(9, json.Length - 10);
+//                string jsonf = "{\"total\":" + count + ",\"rows\":" + json + "}";
+//                ////var result = new { total = count, rows = json };
+//                ////return JsonConvert.SerializeObject(result);
+//                return jsonf;
+//            } else if (stateFinal == "2")
+//            {
+//                DataSet data = OraHelper.ExecuteDataSet($"select * from(select r.*, rownum as rn from(select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS,  (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv  where lv.village_region like '%{cityregion}%' and lv.village_bounds is not null order by create_date desc) r) rtwo where rtwo.rn > {start} and rtwo.rn <= {end}");
+//                DataSet dataCount = OraHelper.ExecuteDataSet($"select count(*) as total from lbs_village lv where lv.village_region like '%{cityregion}%' and lv.village_bounds is not null");
+//                //DataSet data = ohp.Query($"select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS, (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv where lv.village_region like '%{city}%'");
+//                //DataSet data2 = ohp.Query($"select * from lbs_building");
+//                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id = (select village_id from lbs_village lv where lv.village_name = '元电职工住宅A区')");
+//                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.region like '%{city}%'");
+//                //DataSet data3 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id in (select village_id from lbs_village lv where rownum<2 and lv.village_region like '%{city}%' )");
+//                int count = int.Parse(dataCount.Tables[0].Rows[0].ItemArray[0].ToString());
+//                string json = JsonConvert.SerializeObject(data);
+//                json = json.Substring(9, json.Length - 10);
+//                string jsonf = "{\"total\":" + count + ",\"rows\":" + json + "}";
+//                ////var result = new { total = count, rows = json };
+//                ////return JsonConvert.SerializeObject(result);
+//                return jsonf;
+//            } else 
+//            {
+//                DataSet data = OraHelper.ExecuteDataSet($"select * from(select r.*, rownum as rn from(select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS,  (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv  where lv.village_region like '%{cityregion}%' and (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) != 0 and lv.village_bounds is not null order by create_date desc) r) rtwo where rtwo.rn > {start} and rtwo.rn <= {end}");
+//                DataSet dataCount = OraHelper.ExecuteDataSet($"select count(*) as total from lbs_village lv where lv.village_region like '%{cityregion}%' and (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) != 0 and lv.village_bounds is not null");
+//                //DataSet data = ohp.Query($"select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS, (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv where lv.village_region like '%{city}%'");
+//                //DataSet data2 = ohp.Query($"select * from lbs_building");
+//                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id = (select village_id from lbs_village lv where lv.village_name = '元电职工住宅A区')");
+//                //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.region like '%{city}%'");
+//                //DataSet data3 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id in (select village_id from lbs_village lv where rownum<2 and lv.village_region like '%{city}%' )");
+//                int count = int.Parse(dataCount.Tables[0].Rows[0].ItemArray[0].ToString());
+//                string json = JsonConvert.SerializeObject(data);
+//                json = json.Substring(9, json.Length - 10);
+//                string jsonf = "{\"total\":" + count + ",\"rows\":" + json + "}";
+//                ////var result = new { total = count, rows = json };
+//                ////return JsonConvert.SerializeObject(result);
+//                return jsonf;
+//            }
+//        }
+
+//        /// <summary>
+//        /// 下拉框获取区县数据
+//        /// </summary>
+//        /// <param name="page"></param>
+//        /// <param name="rows"></param>
+//        /// <param name="region"></param>
+//        /// <returns></returns>
+//        public string IndexByCityRegion(HttpContext context)
+//        {
+//            string page = context.Request["page"];
+//            string rows = context.Request["rows"];
+//            string cityregion = context.Request["cityregion"];
+//            var pageInt = int.Parse(page);
+//            var rowsInt = int.Parse(rows);
+//            var start = (pageInt * rowsInt) - rowsInt;
+//            var end = pageInt * rowsInt;
+//            if (cityregion == null)
+//            {
+//                return "404";
+//            }
+//            DataSet data = OraHelper.ExecuteDataSet($"select * from(select r.*, rownum as rn from(select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS,  (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv  where lv.village_region like '%{cityregion}%' order by create_date desc) r) rtwo where rtwo.rn > {start} and rtwo.rn <= {end}");
+//            DataSet dataCount = OraHelper.ExecuteDataSet($"select count(*) as total from lbs_village lv where lv.village_region like '%{cityregion}%'");
+//            //DataSet data = ohp.Query($"select RAWTOHEX(VILLAGE_ID) as VILLAGE_ID, VILLAGE_NAME, VILLAGE_ADDRESS, VILLAGE_REGION, VILLAGE_TYPE, VILLAGE_LNG, VILLAGE_LAT, VILLAGE_BOUNDS, (select count(*) from lbs_building lb where lb.village_id = (lv.village_id)) as village_count from lbs_village lv where lv.village_region like '%{city}%'");
+//            //DataSet data2 = ohp.Query($"select * from lbs_building");
+//            //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id = (select village_id from lbs_village lv where lv.village_name = '元电职工住宅A区')");
+//            //DataSet data2 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.region like '%{city}%'");
+//            //DataSet data3 = ohp.Query($"select RAWTOHEX(BUILDING_ID) as BUILDING_ID, BUILDING_NAME, BUILDING_ADDRESS, LNG, LAT from lbs_building lb where lb.village_id in (select village_id from lbs_village lv where rownum<2 and lv.village_region like '%{city}%' )");
+//            int count = int.Parse(dataCount.Tables[0].Rows[0].ItemArray[0].ToString());
+//            string json = JsonConvert.SerializeObject(data);
+//            json = json.Substring(9, json.Length - 10);
+//            string jsonf = "{\"total\":" + count + ",\"rows\":" + json + "}";
+//            //var result = new { total = count, rows = json };
+//            //return JsonConvert.SerializeObject(result);
+//            return jsonf;
+//        }
+
+
+
+
+
+
+
+
+
+//        public bool IsReusable
+//        {
+//            get
+//            {
+//                return false;
+//            }
+//        }
+//    }
+//}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//var form, layer, element;
+//layui.use(['form', 'layedit', 'laydate', 'layer', 'element'], function () {
+//    form = layui.form
+//        , layer = layui.layer
+//        , layedit = layui.layedit
+//        , laydate = layui.laydate
+//        , element = layui.element;
+//});
+
+//var map = new AMap.Map("container", {
+//    zoom: 17,
+//    showIndoorMap: false,
+//    showLabel: true,
+//    mapStyle: 'amap://styles/light',
+//    center: [116.401165, 39.902355],
+//    features: ['bg', 'point', 'road', 'building'],
+//    viewMode: '3D',
+//    layers: [
+//        new AMap.TileLayer({})
+//    ]
+//});
+//map.addControl(new AMap.Scale());
+//map.addControl(new AMap.ControlBar({
+//    showZoomBar: false,
+//    showControlButton: true,
+//    position: {
+//        top: '100px',
+//        right: '20px'
+//    }
+//}));
+
+////编辑器
+//var mousetool;
+//map.plugin(["AMap.MouseTool"], function () {
+//    mousetool = new AMap.MouseTool(map);
+//    mousetool.on('draw', function (event) {
+//        // event.obj 为绘制出来的覆盖物对象
+//        var polygon = event.obj;
+//        if (polygon.CLASS_NAME === "AMap.Polygon") {
+//            var bounds = polygon.getPath();
+//            var list = [];
+//            bounds.forEach(function (coord) {
+//                var lng = coord["lng"];
+//                var lat = coord["lat"];
+//                list.push([lng, lat]);
+//            })
+//            document.getElementById('fieldHidden').value = JSON.stringify(list);
+//            mousetool.close();
+
+//        } else {
+//            var position = polygon.getPosition();
+//            var lng = position.lng;
+//            var lat = position.lat;
+//            document.getElementById('fieldHidden2').innerText = lng + ' ' + lat;
+//            mousetool.close();
+//        }
+//    });
+//});
+
+//function drawPolygon() {
+//    mousetool.polygon({
+//        strokeOpacity: 1,
+//        strokeWeight: 3,
+//        strokeOpacity: 0.2,
+//        fillColor: '#1791fc',
+//        fillOpacity: 0.4,
+//        // 线样式还支持 'dashed'
+//        strokeStyle: "solid",
+//        // strokeStyle是dashed时有效
+//        // strokeDasharray: [30,10],
+//    });
+//}
+
+//function drawMarker() {
+//    var icon = new AMap.Icon({
+//        size: new AMap.Size(15, 15),
+//        image: './icons/circle2.png',  // Icon的图像
+//        imageSize: new AMap.Size(15, 15)
+//    });
+//    mousetool.marker({
+//        icon: icon // 添加 Icon 图标 URL
+//    });
+//}
+
+////打开/关闭小区边界
+//function openPois(e) {
+//    e.classList.remove("layui-btn-primary");
+//    e.classList.add("layui-btn-normal");
+//    e.innerHTML += `<i class="fa fa-check ml-3px"></i>`;
+//    e.setAttribute("disabled", true);
+//    var sibling = e.nextSibling;
+//    sibling.classList.remove("layui-btn-normal");
+//    sibling.classList.add("layui-btn-primary");
+//    sibling.innerHTML = `否`;
+//    sibling.removeAttribute("disabled");
+//    var overlays = map.getAllOverlays("polygon");
+//    overlays.forEach(function (overlay) {
+//        overlay.show();
+//    });
+//}
+
+//function closePois(e) {
+//    e.classList.remove("layui-btn-primary");
+//    e.classList.add("layui-btn-normal");
+//    e.innerHTML += `<i class="fa fa-check ml-3px"></i>`;
+//    e.setAttribute("disabled", true);
+//    var sibling = e.previousSibling;
+//    sibling.classList.remove("layui-btn-normal");
+//    sibling.classList.add("layui-btn-primary");
+//    sibling.innerHTML = `是`;
+//    sibling.removeAttribute("disabled");
+//    var overlays = map.getAllOverlays("polygon");
+//    overlays.forEach(function (overlay) {
+//        overlay.hide();
+//    });
+//}
+
+//$("#dg").datagrid({
+//    columns: [[
+//        { field: "VILLAGE_NAME", title: "小区名称", width: 100, align: "center" },
+//        { field: "VILLAGE_ADDRESS", title: "详细地址", width: 120, align: "center" },
+//        { field: "VILLAGE_REGION", title: "区域", width: 80, align: "center" },
+//        { field: "VILLAGE_TYPE", title: "类型", width: 80, align: "center" },
+//        { field: "VILLAGE_COUNT", title: "楼宇数", width: 50, align: "center" },
+//        {
+//            field: "VILLAGE_HASBOUNDS", title: "边界", width: 50, align: "center", formatter: function (value, row, index) {
+//                if (row.VILLAGE_BOUNDS !== null) {
+//                    return "有";
+//                } else {
+//                    return "无";
+//                }
+//            }
+//        },
+//        {
+//            field: "VILLAGE_ACTION", title: "操作", width: 50, align: "center", formatter: function (value, row, index) {
+//                return `<i class="fa fa-eye mr-5" data-lng="${row.VILLAGE_LNG}" data-lat="${row.VILLAGE_LAT}" data-bounds="${row.VILLAGE_BOUNDS}" data-guid="${row.VILLAGE_ID}" onclick="getPoiDetail(this);"></i><i class="fa fa-edit mr-5" data-guid="${row.VILLAGE_ID}" onclick="editPoi(this);"></i><i class="fa fa-trash-o" data-guid="${row.VILLAGE_ID}" onclick="deletePoi(this);"></i>`;
+//            }
+//        },
+//    ]]
+//});
+
+//$("#dg2").datagrid({
+//    columns: [[
+//        { field: "BUILDING_NAME", title: "楼宇名称", width: 80, align: "center" },
+//        { field: "BUILDING_ADDRESS", title: "详细地址", width: 80, align: "center" },
+//        { field: "BLUELABEL", title: "蓝牌地址码", width: 80, align: "center" },
+//        {
+//            field: "BUILDING_ACTION", title: "操作", width: 50, align: "center", formatter: function (value, row, index) {
+//                return `<i class=\"fa fa-eye mr-5 \" data-lng="${row.LNG}" data-lat="${row.LAT}" data-guid="${row.BUILDING_ID}" onclick="getPoiDetail2(this);"></i> <i class=\"fa fa-edit mr-5 \" data-guid="${row.BUILDING_ID} " onclick="editPoi2(this); "></i><i class=\"fa fa-trash-o \" data-guid="${row.BUILDING_ID} " onclick="deletePoi2(this); "></i>`;
+//            }
+//        }
+//    ]]
+//});
+
+//$('.datagrid-pager.pagination').pagination({
+//    displayMsg: "显示 {total} 条 中 {from} 到 {to} 条"
+//});
+
+//$('#dg').datagrid({
+//    onClickRow: function (index, field, value) {
+//        map.clearMap();
+//        map.setZoom(17);
+//        map.setCenter([field.VILLAGE_LNG, field.VILLAGE_LAT]);
+//        if (field.VILLAGE_BOUNDS !== null) {
+//            var polygon = new AMap.Polygon({
+//                strokeWeight: 2,
+//                strokeOpacity: 1,
+//                fillOpacity: 0,
+//                bubble: true,
+//                path: JSON.parse(field.VILLAGE_BOUNDS),
+//                map: map
+//            });
+//            var polylineEditor = new AMap.PolyEditor(map, polygon);
+//            polygon.setExtData({ "editor": polylineEditor });
+//        }
+//        if (field.VILLAGE_BOUNDS === null) {
+//            var icon = new AMap.Icon({
+//                size: new AMap.Size(20, 20),
+//                image: './icons/village.png',  // Icon的图像
+//                imageSize: new AMap.Size(20, 20)
+//            });
+//            var marker = new AMap.Marker({
+//                position: new AMap.LngLat(field.VILLAGE_LNG, field.VILLAGE_LAT),   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+//                title: field.VILLAGE_NAME,
+//                icon: icon // 添加 Icon 图标 URL
+//            });
+//            map.add(marker);
+//        }
+//        if (field.VILLAGE_COUNT !== 0) {
+//            $.ajax({
+//                type: "get",
+//                url: `./Level5Address.ashx?m=GetBuildings&villageid=${field.VILLAGE_ID}`,
+//                contentType: "application/json; charset=utf-8",
+//                dataType: "json",
+//                success: function (data) {
+//                    data.forEach(function (building) {
+//                        var icon = new AMap.Icon({
+//                            size: new AMap.Size(15, 15),
+//                            image: './icons/circle.png',  // Icon的图像
+//                            imageSize: new AMap.Size(15, 15)
+//                        });
+//                        var marker = new AMap.Marker({
+//                            position: new AMap.LngLat(building.LNG, building.LAT),   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+//                            title: building.BUILDING_NAME,
+//                            icon: icon // 添加 Icon 图标 URL
+//                        });
+//                        map.add(marker);
+//                    });
+
+//                },
+//                error: function (item, err) {
+//                    console.log(err);
+//                }
+//            });
+//            // get related buildings and
+//            // use data to draw markers
+//        }
+//        $("#dg2").datagrid({
+//            url: `./Level5Address.ashx?m=GetBuildingsPaginated&text=&villageid=${field.VILLAGE_ID}`,
+//            method: 'get',
+//            onLoadSuccess: function (data) {
+//                //$("#dg").datagrid('selectRow',0);
+//            }
+//        });
+//    }
+//});
+
+//$('#dg2').datagrid({
+//    onClickRow: function (index, field, value) {
+//        // set all markers to blue and find marker with same lng/lat and set it to red
+//        //map.setCenter([field.LNG, field.LAT]);
+//        var icon = new AMap.Icon({
+//            size: new AMap.Size(15, 15),
+//            image: './icons/circle.png', // Icon的图像
+//            imageSize: new AMap.Size(15, 15)
+//        });
+//        var icon2 = new AMap.Icon({
+//            size: new AMap.Size(15, 15),
+//            image: './icons/circle1.png', // Icon的图像
+//            imageSize: new AMap.Size(15, 15)
+//        });
+//        var markers = map.getAllOverlays("marker");
+//        markers.forEach(function (marker) {
+//            marker.setIcon(icon);
+//        });
+//        markers.forEach(function (marker) {
+//            if (marker.getPosition()["lng"] == field.LNG && marker.getPosition()["lat"] == field.LAT) {
+//                marker.setIcon(icon2);
+//            }
+//        });
+//    }
+//});
+
+////复选框获取带有楼宇边界小区数据
+//$('#checkboxHasBuildings').checkbox({
+//    labelWidth: 50,
+//    onChange: function (checked) {
+//        var province = $("#selectProvince").find("option:selected").text();
+//        var city = $("#selectCity").find("option:selected").text();
+//        var county = $("#selectCounty").find("option:selected").text();
+//        var region = province + "/" + city + "/" + county;
+//        if (province !== "全部" && city !== "全部" && county !== "全部") {
+//            var stateA = $('#checkboxHasBuildings').checkbox('options').checked;
+//            var stateB = $('#checkboxHasBounds').checkbox('options').checked;
+//            var stateFinal = "";
+//            if (stateA && !stateB) {
+//                stateFinal = "1";
+//            } else if (!stateA && stateB) {
+//                stateFinal = "2";
+//            } else if (stateA && stateB) {
+//                stateFinal = "3";
+//            } else {
+//                stateFinal = "4"
+//            }
+//            if (stateFinal !== "4") {
+//                map.clearMap();
+//                $("#dg").datagrid({
+//                    pageNumber: 1,
+//                    url: `./Level5Address.ashx?m=IndexByCityRegionHasBuildingsBounds&cityregion=${region}&stateFinal=${stateFinal}`,
+//                    method: 'get',
+//                    onLoadSuccess: function (data) {
+//                        document.getElementsByClassName('datagrid-row')[0].click();
+//                    }
+//                });
+//            } else {
+//                map.clearMap();
+//                $("#dg").datagrid({
+//                    pageNumber: 1,
+//                    url: `./Level5Address.ashx?m=IndexByCityRegion&cityregion=${region}`,
+//                    method: 'get',
+//                    onLoadSuccess: function (data) {
+//                        document.getElementsByClassName('datagrid-row')[0].click();
+//                    }
+//                });
+//            }
+//        } else if (province !== "全部" && city !== "全部" && county === "全部") {
+//            var stateA = $('#checkboxHasBuildings').checkbox('options').checked;
+//            var stateB = $('#checkboxHasBounds').checkbox('options').checked;
+//            var stateFinal = "";
+//            if (stateA && !stateB) {
+//                stateFinal = "1";
+//            } else if (!stateA && stateB) {
+//                stateFinal = "2";
+//            } else if (stateA && stateB) {
+//                stateFinal = "3";
+//            } else {
+//                stateFinal = "4"
+//            }
+//            if (stateFinal !== "4") {
+//                map.clearMap();
+//                $("#dg").datagrid({
+//                    pageNumber: 1,
+//                    url: `./Level5Address.ashx?m=IndexByCityRegionHasBuildingsBounds&cityregion=${city}&stateFinal=${stateFinal}`,
+//                    method: 'get',
+//                    onLoadSuccess: function (data) {
+//                        document.getElementsByClassName('datagrid-row')[0].click();
+//                    }
+//                });
+//            } else {
+//                map.clearMap();
+//                $("#dg").datagrid({
+//                    pageNumber: 1,
+//                    url: `./Level5Address.ashx?m=IndexByCityRegion&cityregion=${city}`,
+//                    method: 'get',
+//                    onLoadSuccess: function (data) {
+//                        document.getElementsByClassName('datagrid-row')[0].click();
+//                    }
+//                });
+//            }
+
+//        } else {
+//            layer.msg('请选择省份,城市,和区县');
+//        }
+//    }
+//});
+
+//$('#checkboxHasBounds').checkbox({
+//    labelWidth: 50,
+//    onChange: function (checked) {
+//        var province = $("#selectProvince").find("option:selected").text();
+//        var city = $("#selectCity").find("option:selected").text();
+//        var county = $("#selectCounty").find("option:selected").text();
+//        var region = province + "/" + city + "/" + county;
+//        if (province !== "全部" && city !== "全部" && county !== "全部") {
+//            var stateA = $('#checkboxHasBuildings').checkbox('options').checked;
+//            var stateB = $('#checkboxHasBounds').checkbox('options').checked;
+//            var stateFinal = "";
+//            if (stateA && !stateB) {
+//                stateFinal = "1";
+//            } else if (!stateA && stateB) {
+//                stateFinal = "2";
+//            } else if (stateA && stateB) {
+//                stateFinal = "3";
+//            } else {
+//                stateFinal = "4"
+//            }
+//            if (stateFinal !== "4") {
+//                map.clearMap();
+//                $("#dg").datagrid({
+//                    pageNumber: 1,
+//                    url: `./Level5Address.ashx?m=IndexByCityRegionHasBuildingsBounds&cityregion=${region}&stateFinal=${stateFinal}`,
+//                    method: 'get',
+//                    onLoadSuccess: function (data) {
+//                        document.getElementsByClassName('datagrid-row')[0].click();
+//                    }
+//                });
+//            } else {
+//                map.clearMap();
+//                $("#dg").datagrid({
+//                    pageNumber: 1,
+//                    url: `./Level5Address.ashx?m=IndexByCityRegion&cityregion=${region}`,
+//                    method: 'get',
+//                    onLoadSuccess: function (data) {
+//                        document.getElementsByClassName('datagrid-row')[0].click();
+//                    }
+//                });
+//            }
+//        } else if (province !== "全部" && city !== "全部" && county === "全部") {
+//            var stateA = $('#checkboxHasBuildings').checkbox('options').checked;
+//            var stateB = $('#checkboxHasBounds').checkbox('options').checked;
+//            var stateFinal = "";
+//            if (stateA && !stateB) {
+//                stateFinal = "1";
+//            } else if (!stateA && stateB) {
+//                stateFinal = "2";
+//            } else if (stateA && stateB) {
+//                stateFinal = "3";
+//            } else {
+//                stateFinal = "4"
+//            }
+//            if (stateFinal !== "4") {
+//                map.clearMap();
+//                $("#dg").datagrid({
+//                    pageNumber: 1,
+//                    url: `./Level5Address.ashx?m=IndexByCityRegionHasBuildingsBounds&cityregion=${city}&stateFinal=${stateFinal}`,
+//                    method: 'get',
+//                    onLoadSuccess: function (data) {
+//                        document.getElementsByClassName('datagrid-row')[0].click();
+//                    }
+//                });
+//            } else {
+//                map.clearMap();
+//                $("#dg").datagrid({
+//                    pageNumber: 1,
+//                    url: `./Level5Address.ashx?m=IndexByCityRegion&cityregion=${city}`,
+//                    method: 'get',
+//                    onLoadSuccess: function (data) {
+//                        document.getElementsByClassName('datagrid-row')[0].click();
+//                    }
+//                });
+//            }
+
+//        } else {
+//            layer.msg('请选择省份,城市,和区县');
+//        }
+//    }
+//});
+
+//////复选框获取带有楼宇小区数据
+////$('#checkboxHasBuildings').checkbox({
+////    labelWidth: 50,
+////    onChange: function (checked) {
+////        //$('#checkboxHasBounds').checkbox({ checked: false });
+////        var province = $("#selectProvince").find("option:selected").text();
+////        var city = $("#selectCity").find("option:selected").text();
+////        var county = $("#selectCounty").find("option:selected").text();
+////        var region = province + "/" + city + "/" + county;
+////        if (province !== "全部" && city !== "全部" && county !== "全部") {
+////            if (checked) {
+////                map.clearMap();
+////                $("#dg").datagrid({
+////                    pageNumber: 1,
+////                    url: `./Level5Address.ashx?m=IndexByCityRegionHasBuildings&cityregion=${region}`,
+////                    method: 'get',
+////                    onLoadSuccess: function (data) {
+////                        document.getElementsByClassName('datagrid-row')[0].click();
+////                    }
+////                });
+////            } else {
+////                map.clearMap();
+////                $("#dg").datagrid({
+////                    pageNumber: 1,
+////                    url: `./Level5Address.ashx?m=IndexByCityRegion&cityregion=${region}`,
+////                    method: 'get',
+////                    onLoadSuccess: function (data) {
+////                        document.getElementsByClassName('datagrid-row')[0].click();
+////                    }
+////                });
+////            }
+////        } else if (province !== "全部" && city !== "全部" && county === "全部") {
+////            if (checked) {
+////                map.clearMap();
+////                $("#dg").datagrid({
+////                    pageNumber: 1,
+////                    url: `./Level5Address.ashx?m=IndexByCityRegionHasBuildings&cityregion=${city}`,
+////                    method: 'get',
+////                    onLoadSuccess: function (data) {
+////                        document.getElementsByClassName('datagrid-row')[0].click();
+////                    }
+////                });
+////            } else {
+////                map.clearMap();
+////                $("#dg").datagrid({
+////                    pageNumber: 1,
+////                    url: `./Level5Address.ashx?m=IndexByCityRegion&cityregion=${city}`,
+////                    method: 'get',
+////                    onLoadSuccess: function (data) {
+////                        document.getElementsByClassName('datagrid-row')[0].click();
+////                    }
+////                });
+////            }
+////        } else {
+////            layer.msg('请选择省份,城市,和区县');
+////        }
+////    }
+////});
+
+//////复选框获取带有边界小区数据
+////$('#checkboxHasBounds').checkbox({
+////    labelWidth: 50,
+////    onChange: function (checked) {
+////        //$('#checkboxHasBuildings').checkbox({checked: false});
+////        var province = $("#selectProvince").find("option:selected").text();
+////        var city = $("#selectCity").find("option:selected").text();
+////        var county = $("#selectCounty").find("option:selected").text();
+////        var region = province + "/" + city + "/" + county;
+////        if (province !== "全部" && city !== "全部" && county !== "全部") {
+////            if (checked) {
+////                map.clearMap();
+////                $("#dg").datagrid({
+////                    pageNumber: 1,
+////                    url: `./Level5Address.ashx?m=IndexByCityRegionHasBounds&cityregion=${region}`,
+////                    method: 'get',
+////                    onLoadSuccess: function (data) {
+////                        document.getElementsByClassName('datagrid-row')[0].click();
+////                    }
+////                });
+////            } else {
+////                map.clearMap();
+////                $("#dg").datagrid({
+////                    pageNumber: 1,
+////                    url: `./Level5Address.ashx?m=IndexByCityRegion&cityregion=${region}`,
+////                    method: 'get',
+////                    onLoadSuccess: function (data) {
+////                        document.getElementsByClassName('datagrid-row')[0].click();
+////                    }
+////                });
+////            }
+////        } else if (province !== "全部" && city !== "全部" && county === "全部") {
+////            if (checked) {
+////                map.clearMap();
+////                $("#dg").datagrid({
+////                    pageNumber: 1,
+////                    url: `./Level5Address.ashx?m=IndexByCityRegionHasBounds&cityregion=${city}`,
+////                    method: 'get',
+////                    onLoadSuccess: function (data) {
+////                        document.getElementsByClassName('datagrid-row')[0].click();
+////                    }
+////                });
+////            } else {
+////                map.clearMap();
+////                $("#dg").datagrid({
+////                    pageNumber: 1,
+////                    url: `./Level5Address.ashx?m=IndexByCityRegion&cityregion=${city}`,
+////                    method: 'get',
+////                    onLoadSuccess: function (data) {
+////                        document.getElementsByClassName('datagrid-row')[0].click();
+////                    }
+////                });
+////            }
+////        } else {
+////            layer.msg('请选择省份,城市,和区县');
+////        }
+////    }
+////});
+
+////搜索小区
+//function searchVillage(e) {
+//    var province = $("#selectProvince").find("option:selected").text();
+//    var city = $("#selectCity").find("option:selected").text();
+//    var county = $("#selectCounty").find("option:selected").text();
+//    if (province === "全部") {
+//        province = "%";
+//    }
+//    if (city === "全部") {
+//        city = "%";
+//    }
+//    if (county === "全部") {
+//        county = "%";
+//    }
+//    var pcc = province + "/" + city + "/" + county;
+//    var stateA = $('#checkboxHasBuildings').checkbox('options').checked;
+//    var stateB = $('#checkboxHasBounds').checkbox('options').checked;
+//    var stateFinal = "";
+//    if (stateA && !stateB) {
+//        stateFinal = "1";
+//    } else if (!stateA && stateB) {
+//        stateFinal = "2";
+//    } else if (stateA && stateB) {
+//        stateFinal = "3";
+//    } else {
+//        stateFinal = "4"
+//    }
+//    state2Final = ""
+//    var valueSearch = document.getElementById('inputSearchVillage').value;
+//    if (valueSearch !== "") {
+//        state2Final = "1";
+//    } else {
+//        state2Final = "2";
+//    }
+//    map.clearMap();
+//    $("#dg").datagrid({
+//        pageNumber: 1,
+//        url: `./Level5Address.ashx?m=IndexByFilter&pcc=${pcc}&stateFinal=${stateFinal}&state2Final=${state2Final}`,
+//        method: 'get',
+//        onLoadSuccess: function (data) {
+//            document.getElementsByClassName('datagrid-row')[0].click();
+//        }
+//    });
+//    //var textSearch = document.getElementById("inputSearchVillage").value;
+//    //var province = $("#selectProvince").find("option:selected").text();
+//    //var city = $("#selectCity").find("option:selected").text();
+//    //var county = $("#selectCounty").find("option:selected").text();
+//    //var region = province + "/" + city + "/" + county;
+//    //if (province !== "全部" && city !== "全部" && county !== "全部") {
+//    //    map.clearMap();
+//    //    $("#dg").datagrid({
+//    //        url: `./Level5Address.ashx?m=SearchByRegion&text=${textSearch}&region=${region}`,
+//    //        method: 'get',
+//    //        onLoadSuccess: function (data) {
+//    //            document.getElementsByClassName('datagrid-row')[0].click();
+//    //        }
+//    //    });
+//    //} else if (province !== "全部" && city !== "全部" && county === "全部") {
+//    //    map.clearMap();
+//    //    $("#dg").datagrid({
+//    //        url: `./Level5Address.ashx?m=SearchByCity&text=${textSearch}&city=${city}`,
+//    //        method: 'get',
+//    //        onLoadSuccess: function (data) {
+//    //            document.getElementsByClassName('datagrid-row')[0].click();
+//    //        }
+//    //    });
+//    //} else {
+//    //    layer.msg("请选择省份,城市,和区县");
+//    //}
+//}
+
+////获取小区
+//function getVillage(e) {
+//    var selectP = document.getElementById('selectProvince');
+//    var selectC = document.getElementById('selectCity');
+//    var selectCT = document.getElementById('selectCounty');
+//    var province = $("#selectProvince").find("option:selected").text();
+//    var city = $("#selectCity").find("option:selected").text();
+//    var county = $("#selectCounty").find("option:selected").text();
+//    var adcode = document.getElementById('selectCounty').value;
+//    var region = province + "/" + city + "/" + county;
+//    if (province !== "全部" && city !== "全部" && county !== "全部") {
+//        $.ajax({
+//            type: "get",
+//            url: `./Level5Address.ashx?m=regionexists&region=${region}`,
+//            dataType: "json",
+//            success: function (data) {
+//                if (data["Table"][0]["COUNT"] === 0) {
+//                    $.ajax({
+//                        type: "get",
+//                        url: `https://restapi.amap.com/v3/place/text?key=c7aeb11746b35a92b7b6eee3178a05e4&keywords=&types=120302&city=${adcode}&children=1&offset=5&page=1&extensions=all`,
+//                        dataType: "json",
+//                        success: function (data) {
+//                            var count = data["count"];
+//                            var times = 0;
+//                            if (count !== 0) {
+//                                //var piece = 100 / count;
+//                                //var currentP = 0;
+//                                //var currentCount = 0;
+//                                var div = document.createElement('div');
+//                                div.setAttribute('id', 'pb');
+//                                div.innerHTML += `<div class="layui-progress layui-progress-big layui-bg-orange" lay-filter="pb" lay-showpercent="true"">
+//  <div class="layui-progress-bar" lay-percent="0%"></div>
+//</div>`;
+//                                document.getElementsByTagName('body')[0].appendChild(div);
+
+
+//                                var currentP = 10;
+//                                //  set your counter to 1
+
+//                                function myLoop() {           //  create a loop function
+//                                    setTimeout(function () {    //  call a 3s setTimeout when the loop is called
+//                                        element.progress('pb', `${String(currentP)}%`);
+
+
+//                                        currentP += 10;                    //  increment the counter
+//                                        if (currentP <= 100) {            //  if the counter < 10, call the loop function
+//                                            myLoop();             //  ..  again which will trigger another
+//                                        } else {
+//                                            document.getElementById('pb').remove(); layer.msg("小区已更新");
+//                                        }//  ..  setTimeout()
+//                                    }, 1000)
+//                                }
+
+//                                myLoop();
+
+
+//                                // wait for 1500ms then run code when code is done repeat until condition meets
+//                                //setTimeout(function () { document.getElementById('pb').remove(); layer.msg("小区已更新"); }, 3000);
+
+//                                times = Math.ceil(count / 20);
+//                                for (var i = 0; i < times; i++) {
+//                                    var page = i + 1;
+//                                    console.log('this is page' + page);
+//                                    $.ajax({
+//                                        type: "get",
+//                                        url: `https://restapi.amap.com/v3/place/text?key=c7aeb11746b35a92b7b6eee3178a05e4&keywords=&types=120302&city=${adcode}&children=1&offset=20&page=${page}&extensions=all`,
+//                                        dataType: "json",
+//                                        success: function (data2) {
+//                                            data2["pois"].forEach(function (poi) {
+//                                                //currentP += piece;
+//                                                //currentCount += 1;
+//                                                //var cP = `${String(currentP)}%`;
+//                                                //element.progress('pb', cP);
+//                                                //if (currentCount === Number(count)) {
+//                                                //    setTimeout(function () { document.getElementById('pb').remove();layer.msg("小区已更新");},1500);
+//                                                //}
+//                                                var region = `${poi["pname"]}/${poi["cityname"]}/${poi["adname"]}`;
+//                                                var lnglat = poi["location"];
+//                                                var lng = Number(lnglat.split(',')[0]);
+//                                                var lat = Number(lnglat.split(',')[1]);
+//                                                $.ajax({
+//                                                    type: "post",
+//                                                    url: `./Level5Address.ashx?m=CreateVillages`,
+//                                                    data: { "village_code": poi["id"], "village_name": poi["name"], "village_address": poi["address"], "village_region": region, "village_type": poi["type"], "village_x": lng, "village_y": lat, "village_lng": lng, "village_lat": lat, "source": "高德" },
+//                                                    dataType: "json",
+//                                                    success: function (data) {
+//                                                        if (data.length !== 0) {
+//                                                            console.log('error');
+//                                                        } else {
+//                                                            //document.getElementsByClassName("modalSmall")[0].remove();
+//                                                            console.log('inserted');
+//                                                            //$('#dg').datagrid('insertRow', {
+//                                                            //    index: 0,
+//                                                            //    row: {
+//                                                            //        village_name: village_name,
+//                                                            //        village_address: village_address,
+//                                                            //        village_region: village_region,
+//                                                            //        village_type: village_type
+//                                                            //    }
+//                                                            //});
+
+
+//                                                        }
+//                                                    },
+//                                                    error: function (item, err) {
+//                                                        console.log(err);
+//                                                    }
+//                                                });
+//                                            });
+//                                        },
+//                                        error: function () {
+//                                            console.log('error');
+//                                        }
+//                                    });
+//                                }
+//                            }
+//                        },
+//                        error: function () {
+//                            console.log('error');
+//                        }
+//                    });
+//                }
+//            },
+//            error: function () {
+//                console.log('error');
+//            }
+//        });
+//    }
+//}
+
+////添加小区
+//function newVillage(e) {
+//    var province = $("#selectProvince").find("option:selected").text();
+//    var city = $("#selectCity").find("option:selected").text();
+//    var county = $("#selectCounty").find("option:selected").text();
+//    if (province !== "全部" && city !== "全部" && county !== "全部") {
+//        var optionsProvince = document.getElementById('selectProvince').innerHTML.split("><");
+//        var optionsCity = document.getElementById('selectCity').innerHTML.split("><");
+//        var optionsCounty = document.getElementById('selectCounty').innerHTML.split("><");
+//        var selectedProvince = $("#selectProvince").find("option:selected").text();
+//        var selectedCity = $("#selectCity").find("option:selected").text();
+//        var selectedCounty = $("#selectCounty").find("option:selected").text();
+//        var optionsProvinceF = "";
+//        var optionsCityF = "";
+//        var optionsCountyF = "";
+//        for (var i = 0; i < optionsProvince.length; i++) {
+//            if (i !== 0) {
+//                if (i !== optionsProvince.length - 1) {
+//                    if (optionsProvince[i].split('>')[1].split('<')[0] === selectedProvince) {
+//                        optionsProvinceF += "<" + optionsProvince[i].split('>')[0] + `selected="">` + optionsProvince[i].split('>')[1] + ">";
+//                    } else {
+//                        optionsProvinceF += "<" + optionsProvince[i] + ">";
+//                    }
+//                } else {
+//                    if (optionsProvince[i].split('>')[1].split('<')[0] === selectedProvince) {
+//                        optionsProvinceF += "<" + optionsProvince[i].split('>')[0] + `selected="">` + optionsProvince[i].split('>')[1];
+//                    } else {
+//                        optionsProvinceF += "<" + optionsProvince[i];
+//                    }
+//                }
+//            }
+//        }
+//        for (var i = 0; i < optionsCity.length; i++) {
+//            if (i !== 0) {
+//                if (i !== optionsCity.length - 1) {
+//                    if (optionsCity[i].split('>')[1].split('<')[0] === selectedCity) {
+//                        optionsCityF += "<" + optionsCity[i].split('>')[0] + `selected="">` + optionsCity[i].split('>')[1] + ">";
+//                    } else {
+//                        optionsCityF += "<" + optionsCity[i] + ">";
+//                    }
+//                } else {
+//                    if (optionsCity[i].split('>')[1].split('<')[0] === selectedCity) {
+//                        optionsCityF += "<" + optionsCity[i].split('>')[0] + `selected="">` + optionsCity[i].split('>')[1];
+//                    } else {
+//                        optionsCityF += "<" + optionsCity[i];
+//                    }
+//                }
+
+//            }
+//        }
+//        for (var i = 0; i < optionsCounty.length; i++) {
+//            if (i !== 0) {
+//                if (i !== optionsCounty.length - 1) {
+//                    if (optionsCounty[i].split('>')[1].split('<')[0] === selectedCounty) {
+//                        optionsCountyF += "<" + optionsCounty[i].split('>')[0] + `selected="">` + optionsCounty[i].split('>')[1] + ">";
+//                    } else {
+//                        optionsCountyF += "<" + optionsCounty[i] + ">";
+//                    }
+//                } else {
+//                    if (optionsCounty[i].split('>')[1].split('<')[0] === selectedCounty) {
+//                        optionsCountyF += "<" + optionsCounty[i].split('>')[0] + `selected="">` + optionsCounty[i].split('>')[1];
+//                    } else {
+//                        optionsCountyF += "<" + optionsCounty[i];
+//                    }
+//                }
+
+//            }
+//        }
+//        var selectProvince = `<select id="selectProvinceTemp" required>` + optionsProvinceF + `</select>`;
+//        var selectCity = `<select id="selectCityTemp" required>` + optionsCityF + `</select>`;
+//        var selectCounty = `<select id="selectCountyTemp" required>` + optionsCountyF + `</select>`;
+//        console.log(selectCity);
+//        var province = $("#selectProvince").find("option:selected").text();
+//        var city = $("#selectCity").find("option:selected").text();
+//        var county = $("#selectCounty").find("option:selected").text();
+//        if (city === "乌鲁木齐市") {
+//            layer.open({
+//                btn: [],
+//                maxWidth: 750,
+//                shade: 0,
+//                title: "新建小区",
+//                end: function () {
+//                    mousetool.close(true);
+//                },
+//                content: `
+//                  <form class="layui-form layui-form-pane" action="" onsubmit="event.preventDefault();addVillage(this);">
+//   <div class="layui-form-item">
+//    <label class="layui-form-label">小区名称</label>
+//    <div class="layui-input-block">
+//     <input type="text" name="village_name" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required="" />
+//    </div>
+//   </div>
+//   <div class="layui-form-item">
+//    <label class="layui-form-label">详细地址</label>
+//    <div class="layui-input-block">
+//     <input type="text" name="village_address" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required="" />
+//    </div>
+//   </div>`+ `
+//   <div class="layui-form-item">
+//    <label class="layui-form-label">区域</label>
+//    <div class="layui-input-inline">
+//     ` + selectProvince + `</div><div class="layui-input-inline"><select id="selectCityTemp" required><option value="650100" selected="">乌鲁木齐市</option><option value="650200">克拉玛依市</option><option value="652100">吐鲁番地区</option><option value="652200">哈密地区</option><option value="652300">昌吉回族自治州</option><option value="652700">博尔塔拉蒙古自治州</option><option value="652800">巴音郭楞蒙古自治州</option><option value="652900">阿克苏地区</option><option value="653000">克孜勒苏柯尔克孜自治州</option><option value="653100">喀什地区</option><option value="653200">和田地区</option><option value="654000">伊犁哈萨克自治州</option><option value="654200">塔城地区</option><option value="654300">阿勒泰地区</option></select></div><div class="layui-input-inline">` + selectCounty + `
+//    </div>
+//   </div>
+//   <div class="layui-form-item">
+//    <label class="layui-form-label">类型</label>
+//    <div class="layui-input-block">
+//     <select name="type" lay-filter="aihao" required=""> <option value="商务住宅;住宅区;住宅小区">商务住宅;住宅区;住宅小区</option> </select>
+//    </div>
+//   </div>
+//   <div class="layui-form-item hidden">
+//    <label class="layui-form-label"></label>
+//    <div class="layui-input-inline">
+//     <input type="text" id="fieldHidden" name="village_bounds" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" />
+//    </div>
+//   </div>
+//   <div class="layui-form-item">
+//    <label class="layui-form-label">添加边界</label>
+//    <div class="layui-input-block">
+//     <input type="checkbox" name="close" lay-skin="switch" lay-text="是|否" lay-filter="switchT" id="cb" />
+//    </div>
+//   </div>
+//   <button type="submit" class="layui-btn layui-btn-normal fr">保存</button>
+//  </form>`
+//            });
+//            form.render();
+//            form.on('switch(switchT)', function (data) {
+//                if (data.elem.checked) {
+//                    drawPolygon();
+//                } else {
+//                    mousetool.close(true);
+//                }
+//            });
+//            //selectCity = `<select id="selectCityTemp" required><option value="650100"selected="">乌鲁木齐市</option><option value="650200">克拉玛依市</option><option value="652100">吐鲁番地区</option><option value="652200">哈密地区</option><option value="652300">昌吉回族自治州</option><option value="652700">博尔塔拉蒙古自治州</option><option value="652800">巴音郭楞蒙古自治州</option><option value="652900">阿克苏地区</option><option value="653000">克孜勒苏柯尔克孜自治州</option><option value="653100">喀什地区</option><option value="653200">和田地区</option><option value="654000">伊犁哈萨克自治州</option><option value="654200">塔城地区</option><option value="654300">阿勒泰地区</option></select>`;
+//        } else {
+//            layer.open({
+//                btn: [],
+//                maxWidth: 750,
+//                shade: 0,
+//                title: "新建小区",
+//                end: function () {
+//                    mousetool.close(true);
+//                },
+//                content: `
+//                  <form class="layui-form layui-form-pane" action="" onsubmit="event.preventDefault();addVillage(this);">
+//   <div class="layui-form-item">
+//    <label class="layui-form-label">小区名称</label>
+//    <div class="layui-input-block">
+//     <input type="text" name="village_name" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required="" />
+//    </div>
+//   </div>
+//   <div class="layui-form-item">
+//    <label class="layui-form-label">详细地址</label>
+//    <div class="layui-input-block">
+//     <input type="text" name="village_address" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required="" />
+//    </div>
+//   </div>`+ `
+//   <div class="layui-form-item">
+//    <label class="layui-form-label">区域</label>
+//    <div class="layui-input-inline">
+//     ` + selectProvince + `</div><div class="layui-input-inline">` + selectCity + `</div><div class="layui-input-inline">` + selectCounty + `
+//    </div>
+//   </div>
+//   <div class="layui-form-item">
+//    <label class="layui-form-label">类型</label>
+//    <div class="layui-input-block">
+//     <select name="type" lay-filter="aihao" required=""> <option value="商务住宅;住宅区;住宅小区">商务住宅;住宅区;住宅小区</option> </select>
+//    </div>
+//   </div>
+//   <div class="layui-form-item hidden">
+//    <label class="layui-form-label"></label>
+//    <div class="layui-input-inline">
+//     <input type="text" id="fieldHidden" name="village_bounds" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" />
+//    </div>
+//   </div>
+//   <div class="layui-form-item">
+//    <label class="layui-form-label">添加边界</label>
+//    <div class="layui-input-block">
+//     <input type="checkbox" name="close" lay-skin="switch" lay-text="是|否" lay-filter="switchT" id="cb" />
+//    </div>
+//   </div>
+//   <button type="submit" class="layui-btn layui-btn-normal fr">保存</button>
+//  </form>`
+//            });
+//            form.render();
+//            form.on('switch(switchT)', function (data) {
+//                if (data.elem.checked) {
+//                    drawPolygon();
+//                } else {
+//                    mousetool.close(true);
+//                }
+//            });
+//        }
+           
+        
+//    }
+// else {
+//    layer.msg("请选择省份,城市,和区县");
+//    }
+//}
+
+//function addVillage(e) {
+//    document.getElementById('cb').checked = false;
+//    form.render('checkbox');
+//    mousetool.close(true);
+//    var errors = document.getElementsByClassName("clRedError");
+//    for (var i = 0; i < errors.length; i++) {
+//        errors[i].remove();
+//    }
+//    if (document.getElementById('fieldHidden').value === "") {
+//        var div = document.createElement('div');
+//        div.classList.add("clRedError");
+//        div.innerHTML += `<p class="mb-5">请输入边界</p>`;
+//        e.appendChild(div);
+//    } else {
+//        var inputs = e.getElementsByTagName('input');
+//        var selects = e.getElementsByTagName('select');
+//        var village_name = inputs[0].value;
+//        var village_address = inputs[1].value;
+//        var village_region = $('#selectProvinceTemp').find(":selected").text() + '/' + $('#selectCityTemp').find(":selected").text() + '/' + $('#selectCountyTemp').find(":selected").text();
+//        var village_type = selects[3].value;
+//        var village_bounds = document.getElementById('fieldHidden').value;
+//        var village_x = String(JSON.parse(document.getElementById('fieldHidden').value)[0][0]);
+//        var village_y = String(JSON.parse(document.getElementById('fieldHidden').value)[0][1]);
+//        var village_lng = String(JSON.parse(document.getElementById('fieldHidden').value)[0][0]);
+//        var village_lat = String(JSON.parse(document.getElementById('fieldHidden').value)[0][1]);
+//        var source = "自建";
+//        $.ajax({
+//            type: "post",
+//            url: `./Level5Address.ashx?m=CreateVillage`,
+//            data: { "village_name": village_name, "village_address": village_address, "village_region": village_region, "village_type": village_type, "village_bounds": village_bounds, "village_x": village_x, "village_y": village_y, "village_lng": village_lng, "village_lat": village_lat, "source": source },
+//            dataType: "json",
+//            success: function (data) {
+//                if (data.length !== 0) {
+//                    var div = document.createElement('div');
+//                    div.classList.add("clRedError");
+//                    data.forEach(function (error) {
+//                        div.innerHTML += `<p class="mb-5">${error}</p>`;
+//                    })
+//                    e.appendChild(div);
+//                } else {
+//                    layer.closeAll();
+//                    layer.msg("小区已添加");
+//                    $('#dg').datagrid('reload');
+//                }
+//            },
+//            error: function (item, err) {
+//                console.log(err);
+//            }
+//        });
+//    }
+//}
+
+////小区详情
+//function getPoiDetail(e) {
+//    var dataGuid = e.getAttribute("data-guid");
+//    $.ajax({
+//        type: "get",
+//        url: `./Level5Address.ashx?m=DetailsVillage&id=${dataGuid}`,
+//        contentType: "application/json; charset=utf-8",
+//        dataType: "json",
+//        success: function (data) {
+//            layer.open({
+//                btn: [],
+//                move: false,
+//                offset: ['100px', '80%'],
+//                shade: 0,
+//                title: "小区信息",
+//                content: `<div class="mb-10"><span class="mr-5 bold">小区名称:</span><span>${data["Table"][0]["VILLAGE_NAME"]}</span></div><div  class="mb-10"><span class="mr-5 bold">详细地址:</span><span>${data["Table"][0]["VILLAGE_ADDRESS"]}</span></div><div  class="mb-10"><span class="mr-5 bold">区域:</span><span>${data["Table"][0]["VILLAGE_REGION"]}</span></div><div  class="mb-10"><span class="mr-5 bold">类型:</span><span>${data["Table"][0]["VILLAGE_TYPE"]}</span></div>`
+//            });
+//        },
+//        error: function (item, err) {
+//            console.log(err);
+//        }
+//    });
+//}
+
+////编辑小区
+//function editPoi(e) {
+//    var dataGuid = e.getAttribute("data-guid");
+//    $.ajax({
+//        type: "get",
+//        url: `./Level5Address.ashx?m=DetailsVillage&id=${dataGuid}`,
+//        contentType: "application/json; charset=utf-8",
+//        dataType: "json",
+//        success: function (data) {
+//            if (data["Table"][0]["VILLAGE_BOUNDS"] === null) {
+//                layer.open({
+//                    btn: [],
+//                    shade: 0,
+//                    title: "编辑小区",
+//                    end: function () {
+//                        mousetool.close(true);
+//                    },
+//                    content: `<form class="layui-form layui-form-pane" action="" onsubmit="event.preventDefault();editPoiBounds(this);" data-guid=${dataGuid}>
+//                   <div class="layui-form-item">
+//                    <label class="layui-form-label">小区名称</label>
+//                    <div class="layui-input-inline">
+//                      <input type="text" name="village_name" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required value="${data["Table"][0]["VILLAGE_NAME"]}">
+//                    </div>
+//                  </div>
+//                  <div class="layui-form-item">
+//                    <label class="layui-form-label">详细地址</label>
+//                    <div class="layui-input-inline">
+//                      <input type="text" name="village_address" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input"  required  value="${data["Table"][0]["VILLAGE_ADDRESS"]}">
+//                    </div>
+//                  </div>
+//              <div class="layui-form-item">
+//                <label class="layui-form-label">区域</label>
+//                <div class="layui-input-block">
+//                  <select name="region" required>
+//                            <option value="` + data["Table"][0]["VILLAGE_REGION"] + `">` + data["Table"][0]["VILLAGE_REGION"] + `
+//                  </option></select>
+//                </div>
+//              </div>
+//<div class="layui-form-item">
+//                <label class="layui-form-label">类型</label>
+//                <div class="layui-input-block">
+//                  <select name="type" lay-filter="aihao"  required>
+//                    <option value="商务住宅;住宅区;住宅小区">商务住宅;住宅区;住宅小区</option>
+//                  </select>
+//                </div>
+//              </div>
+//                <div class="layui-form-item hidden">
+//                    <label class="layui-form-label"></label>
+//                    <div class="layui-input-inline">
+//                      <input type="text" id="fieldHidden" name="village_bounds" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input">
+//                    </div>
+//                  </div>
+//<div class="layui-form-item">
+//                <label class="layui-form-label">编辑边界</label>
+//                <div class="layui-input-block">
+//                  <input type="checkbox" name="close" lay-skin="switch" lay-text="是|否" lay-filter="switchT" id='cb'>
+//                </div>
+//              </div>
+// <button type="submit" class="layui-btn layui-btn-normal fr">保存</button>
+//</form>`
+//                });
+//                form.render();
+//                form.on('switch(switchT)', function (d) {
+//                    if (d.elem.checked) {
+//                        drawPolygon();
+//                    } else {
+//                        mousetool.close(true);
+//                    }
+
+//                });
+//            } else {
+//                var polygon = map.getAllOverlays("polygon")[0];
+//                layer.open({
+//                    btn: [],
+//                    shade: 0,
+//                    title: "编辑小区",
+//                    end: function () {
+//                        polygon.getExtData()["editor"].close();
+//                    },
+//                    content: `<form class="layui-form layui-form-pane" action=""  onsubmit="event.preventDefault();editPoiBounds2(this);" data-guid=${dataGuid}>
+//                   <div class="layui-form-item">
+//                    <label class="layui-form-label">小区名称</label>
+//                    <div class="layui-input-inline">
+//                      <input type="text" name="village_name" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required value="${data["Table"][0]["VILLAGE_NAME"]}">
+//                    </div>
+//                  </div>
+//                  <div class="layui-form-item">
+//                    <label class="layui-form-label">详细地址</label>
+//                    <div class="layui-input-inline">
+//                      <input type="text" name="village_address" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input"  required  value="${data["Table"][0]["VILLAGE_ADDRESS"]}">
+//                    </div>
+//                  </div>
+//              <div class="layui-form-item">
+//                <label class="layui-form-label">区域</label>
+//              <div class="layui-input-block">
+//                  <select name="region" required>
+//                            <option value="` + data["Table"][0]["VILLAGE_REGION"] + `">` + data["Table"][0]["VILLAGE_REGION"] + `
+//                  </option></select>
+//                </div>
+//              </div>
+//<div class="layui-form-item">
+//                <label class="layui-form-label">类型</label>
+//                <div class="layui-input-block">
+//                  <select name="type" lay-filter="aihao"  required>
+//                    <option value="商务住宅;住宅区;住宅小区">商务住宅;住宅区;住宅小区</option>
+//                  </select>
+//                </div>
+//              </div>
+//                <div class="layui-form-item hidden">
+//                    <label class="layui-form-label"></label>
+//                    <div class="layui-input-inline">
+//                      <input type="text" id="fieldHidden" name="village_bounds" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input">
+//                    </div>
+//                  </div>
+//<div class="layui-form-item">
+//                <label class="layui-form-label">编辑边界</label>
+//                <div class="layui-input-block">
+//                  <input type="checkbox" name="close" lay-skin="switch" lay-text="是|否" lay-filter="switchT" id='cb'>
+//                </div>
+//              </div>
+// <button type="submit" class="layui-btn layui-btn-normal fr">保存</button>
+//</form>`
+//                });
+//                form.render();
+//                form.on('switch(switchT)', function (d) {
+//                    if (d.elem.checked) {
+//                        polygon.getExtData()["editor"].open();
+//                    } else {
+//                        polygon.getExtData()["editor"].close();
+//                    }
+//                });
+//            }
+//        },
+//        error: function (item, err) {
+//            console.log(err);
+//        }
+//    });
+//}
+
+//function editPoiBounds(e) {
+//    document.getElementById('cb').checked = false;
+//    form.render('checkbox');
+//    mousetool.close(true);
+//    var errors = document.getElementsByClassName("clRedError");
+//    for (var i = 0; i < errors.length; i++) {
+//        errors[i].remove();
+//    }
+//    if (document.getElementById('fieldHidden').value === "") {
+//        var div = document.createElement('div');
+//        div.classList.add("clRedError");
+//        div.innerHTML += `<p class="mb-5">请输入边界</p>`;
+//        e.appendChild(div);
+//    } else {
+//        var inputs = e.getElementsByTagName('input');
+//        var village_name = inputs[0].value;
+//        var village_address = inputs[1].value;
+//        var village_region = inputs[2].value;
+//        var village_type = inputs[3].value;
+//        var village_bounds = document.getElementById('fieldHidden').value;
+//        var dataGuid = e.getAttribute("data-guid");
+//        $.ajax({
+//            type: "post",
+//            url: `./Level5Address.ashx?m=EditVillageBounds&id=${dataGuid}`,
+//            data: { "village_name": village_name, "village_address": village_address, "village_region": village_region, "village_type": village_type, "village_bounds": village_bounds },
+//            dataType: "json",
+//            success: function (data) {
+//                if (data.length !== 0) {
+//                    var div = document.createElement('div');
+//                    div.classList.add("clRedError");
+//                    data.forEach(function (error) {
+//                        div.innerHTML += `<p class="mb-5">${error}</p>`;
+//                    })
+//                    e.appendChild(div);
+//                } else {
+//                    layer.closeAll();
+//                    layer.msg("小区已编辑");
+//                    $('#dg').datagrid('reload');
+//                }
+
+//            },
+//            error: function (item, err) {
+//                console.log(err);
+//            }
+//        });
+//    }
+//}
+
+//function editPoiBounds2(e) {
+//    document.getElementById('cb').checked = false;
+//    form.render('checkbox');
+//    var polygon = map.getAllOverlays("polygon")[0];
+//    polygon.getExtData()["editor"].close();
+//    var errors = document.getElementsByClassName("clRedError");
+//    for (var i = 0; i < errors.length; i++) {
+//        errors[i].remove();
+//    }
+//    var inputs = e.getElementsByTagName('input');
+//    var village_name = inputs[0].value;
+//    var village_address = inputs[1].value;
+//    var village_region = inputs[2].value;
+//    var village_type = inputs[3].value;
+//    village_bounds = "[";
+//    polygon.getPath().forEach(function (coord) {
+//        village_bounds += `[${String(coord["lng"])},${String(coord["lat"])}],`;
+//    });
+//    village_bounds = village_bounds.slice(0, village_bounds.length - 1);
+//    village_bounds += "]";
+//    var dataGuid = e.getAttribute("data-guid");
+//    $.ajax({
+//        type: "post",
+//        url: `./Level5Address.ashx?m=EditVillageBounds&id=${dataGuid}`,
+//        data: { "village_name": village_name, "village_address": village_address, "village_region": village_region, "village_type": village_type, "village_bounds": village_bounds },
+//        dataType: "json",
+//        success: function (data) {
+//            if (data.length !== 0) {
+//                var div = document.createElement('div');
+//                div.classList.add("clRedError");
+//                data.forEach(function (error) {
+//                    div.innerHTML += `<p class="mb-5">${error}</p>`;
+//                })
+//                e.appendChild(div);
+//            } else {
+//                layer.closeAll();
+//                layer.msg("小区已编辑");
+//                $('#dg').datagrid('reload');
+//            }
+//        },
+//        error: function (item, err) {
+//            console.log(err);
+//        }
+//    });
+//}
+
+////删除小区
+//function deletePoi(e) {
+//    var dataGuid = e.getAttribute("data-guid");
+//    layer.open({
+//        btn: [],
+//        shade: 0,
+//        title: "删除小区",
+//        content: `<div><div class="mb-15 tc">确定删除小区?</div><div class="tr"><button type="submit" class="layui-btn layui-btn-danger" data-guid=${dataGuid} onclick="deletePoiFinal(this);">删除</button></div></div>`
+//    });
+//}
+
+//function deletePoiFinal(e) {
+//    var dataGuid = e.getAttribute("data-guid");
+//    $.ajax({
+//        type: "post",
+//        url: `./Level5Address.ashx?m=DeleteVillage&id=${dataGuid}`,
+//        dataType: "json",
+//        success: function (data) {
+//            if (data.length !== 0) {
+//                console.log('error');
+//            } else {
+//                layer.closeAll();
+//                layer.msg("小区已删除");
+//                $('#dg').datagrid('reload');
+//            }
+//        },
+//        error: function (item, err) {
+//            console.log(err);
+//        }
+//    });
+//}
+
+////搜索楼宇
+//function searchBuilding(e) {
+//    var textSearch = document.getElementById("inputSearchBuilding").value;
+//    var villageSelected = $('#dg').datagrid('getSelected');
+//    if (villageSelected !== null) {
+//        $("#dg2").datagrid({
+//            url: `./Level5Address.ashx?m=GetBuildingsPaginatedSearch&text=${textSearch}&villageid=${villageSelected.VILLAGE_ID}`,
+//            method: 'get',
+//            onLoadSuccess: function (data) {
+
+//                //$("#dg").datagrid('selectRow',0);
+//            }
+//        });
+//    } else {
+//        layer.msg("请选择小区");
+//    }
+//}
+
+////获取楼宇
+//function getBuildingNumber(str) {
+//    var r = str.match(/[a-zA-Z]/);
+//    if (r !== null) {
+//        return str.slice(r["index"]);
+//    } else {
+//        var r2 = str.match(/\d/);
+//        if (r2 !== null) {
+//            return str.slice(r2["index"]);
+//        } else {
+//            return str;
+//        }
+//    }
+//}
+
+//function getBuilding(e) {
+//    var selectP = document.getElementById('selectProvince');
+//    var selectC = document.getElementById('selectCity');
+//    var selectCT = document.getElementById('selectCounty');
+//    var province = $("#selectProvince").find("option:selected").text();
+//    var city = $("#selectCity").find("option:selected").text();
+//    var county = $("#selectCounty").find("option:selected").text();
+//    var adcode = document.getElementById('selectCounty').value;
+//    var region = province + "/" + city + "/" + county;
+//    if (province !== "全部" && city !== "全部" && county !== "全部") {
+//        $.ajax({
+//            type: "get",
+//            url: `./Level5Address.ashx?m=regionexists2&region=${region}`,
+//            dataType: "json",
+//            success: function (data) {
+//                if (data["Table"][0]["COUNT"] === 0) {
+//                    $.ajax({
+//                        type: "get",
+//                        url: `https://restapi.amap.com/v3/place/text?key=c7aeb11746b35a92b7b6eee3178a05e4&keywords=&types=190403&city=${adcode}&children=1&offset=5&page=1&extensions=all`,
+//                        dataType: "json",
+//                        success: function (data) {
+//                            var count = data["count"];
+//                            var times = 0;
+//                            if (count !== 0) {
+//                                //  var piece = 100 / count;
+//                                //var currentP = 0;
+//                                //var currentCount = 0;
+//                                var div = document.createElement('div');
+//                                div.setAttribute('id', 'pb');
+//                                div.innerHTML += `<div class="layui-progress layui-progress-big layui-bg-orange" lay-filter="pb" lay-showpercent="true"">
+//  <div class="layui-progress-bar" lay-percent="0%"></div>
+//</div>`;
+//                                document.getElementsByTagName('body')[0].appendChild(div);
+
+//                                var currentP = 10;
+//                                //  set your counter to 1
+
+//                                function myLoop() {           //  create a loop function
+//                                    setTimeout(function () {    //  call a 3s setTimeout when the loop is called
+//                                        element.progress('pb', `${String(currentP)}%`);
+
+
+//                                        currentP += 10;                    //  increment the counter
+//                                        if (currentP <= 100) {            //  if the counter < 10, call the loop function
+//                                            myLoop();             //  ..  again which will trigger another
+//                                        } else {
+//                                            document.getElementById('pb').remove(); layer.msg("楼宇已更新");
+//                                        }//  ..  setTimeout()
+//                                    }, 1000)
+//                                }
+
+//                                myLoop();
+//                                times = Math.ceil(count / 20);
+//                                console.log(count);
+//                                for (var i = 0; i < times; i++) {
+//                                    var page = i + 1;
+//                                    console.log('this is page' + page);
+//                                    $.ajax({
+//                                        type: "get",
+//                                        url: `https://restapi.amap.com/v3/place/text?key=c7aeb11746b35a92b7b6eee3178a05e4&keywords=&types=190403&city=${adcode}&children=1&offset=20&page=${page}&extensions=all`,
+//                                        dataType: "json",
+//                                        success: function (data2) {
+//                                            console.log(data2);
+//                                            data2["pois"].forEach(function (poi) {
+//                                                // currentP += piece;
+//                                                //currentCount += 1;
+//                                                //                                                        console.log(currentCount);
+
+//                                                //var cP = `${String(currentP)}%`;
+//                                                //element.progress('pb', cP);
+//                                                //if (currentCount === Number(count)) {
+//                                                //    setTimeout(function () { document.getElementById('pb').remove();layer.msg("楼宇已更新");},1500);
+//                                                //}
+//                                                var region = `${poi["pname"]}/${poi["cityname"]}/${poi["adname"]}`;
+//                                                var lnglat = poi["location"];
+//                                                var lng = Number(lnglat.split(',')[0]);
+//                                                var lat = Number(lnglat.split(',')[1]);
+//                                                var building_number = getBuildingNumber(poi["name"]);
+//                                                $.ajax({
+//                                                    type: "post",
+//                                                    url: `./Level5Address.ashx?m=CreateBuildings`,
+//                                                    data: { "building_code": poi["id"], "building_number": building_number, "building_name": poi["name"], "building_address": poi["address"], "building_region": region, "building_type": poi["type"], "building_x": lng, "building_y": lat, "building_lng": lng, "building_lat": lat, "village_id": poi["parent"], "source": "高德" },
+//                                                    dataType: "json",
+//                                                    success: function (data) {
+//                                                        if (data.length !== 0) {
+//                                                            console.log('error');
+//                                                        } else {
+//                                                            //document.getElementsByClassName("modalSmall")[0].remove();
+//                                                            console.log('inserted');
+//                                                            //$('#dg').datagrid('insertRow', {
+//                                                            //    index: 0,
+//                                                            //    row: {
+//                                                            //        village_name: village_name,
+//                                                            //        village_address: village_address,
+//                                                            //        village_region: village_region,
+//                                                            //        village_type: village_type
+//                                                            //    }
+//                                                            //});
+
+
+//                                                        }
+//                                                    },
+//                                                    error: function (item, err) {
+//                                                        console.log(err);
+//                                                    }
+//                                                });
+//                                            });
+//                                        },
+//                                        error: function () {
+//                                            console.log('error');
+//                                        }
+//                                    });
+//                                }
+//                            }
+//                        },
+//                        error: function () {
+//                            console.log('error');
+//                        }
+//                    });
+//                }
+//            },
+//            error: function () {
+//                console.log('error');
+//            }
+//        });
+//    }
+//}
+
+////新建楼宇
+//function newBuilding(e) {
+//    var villageSelected = $('#dg').datagrid('getSelected');
+//    if (villageSelected !== null) {
+//        var villageId = villageSelected.VILLAGE_ID;
+//        var villageRegion = villageSelected.VILLAGE_REGION;
+//        var optionsProvince = document.getElementById('selectProvince').innerHTML;
+//        var optionsCity = document.getElementById('selectCity').innerHTML;
+//        var optionsCounty = document.getElementById('selectCounty').innerHTML;
+//        var selectProvince = `<select id="selectProvinceTemp" required>` + optionsProvince.slice(28) + `</select>`;
+//        var selectCity = `<select id="selectCityTemp" required>` + optionsCity.slice(28) + `</select>`;
+//        var selectCounty = `<select id="selectCountyTemp" required>` + optionsCounty.slice(28) + `</select>`;
+//        layer.open({
+//            btn: [],
+//            maxWidth: 750,
+//            shade: 0,
+//            end: function () {
+//                mousetool.close(true);
+//            },
+//            title: "新建楼宇",
+//            content: `<form class="layui-form layui-form-pane" action="" onsubmit="event.preventDefault();addBuilding(this);">
+//                   <div class="layui-form-item">
+//                    <label class="layui-form-label">楼宇号码</label>
+//                <div class="layui-input-block">
+//                      <input type="text" name="building_number" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required>
+//                    </div>
+//                  </div>
+//              <div class="layui-form-item">
+//                    <label class="layui-form-label">楼宇名称</label>
+//                <div class="layui-input-block">
+//                      <input type="text" name="building_name" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required>
+//                    </div>
+//                  </div>
+//                  <div class="layui-form-item">
+//                    <label class="layui-form-label">详细地址</label>
+//                <div class="layui-input-block">
+//                      <input type="text" name="building_address" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required>
+//                    </div>
+//                  </div>
+// <div class="layui-form-item">
+//                    <label class="layui-form-label">蓝牌地址码</label>
+//                <div class="layui-input-block">
+//                      <input type="text" name="bluelabel" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" required>
+//                    </div>
+//                  </div>
+// <div class="layui-form-item">
+
+//                <label class="layui-form-label">类型</label>
+//                <div class="layui-input-block">
+//                  <select name="type" lay-filter="aihao" required>
+//                    <option value="地名地址信息;门牌信息;楼栋号">地名地址信息;门牌信息;楼栋号</option>
+//                  </select>
+//                </div>
+//              </div>
+// <div id="fieldHidden3" class="layui-form-item hidden">` + villageId + `</div><div id="fieldHidden" class="layui-form-item hidden">` + villageRegion + `</div><div id="fieldHidden2" class="layui-form-item hidden"></div>
+//<div class="layui-form-item">
+//    <label class="layui-form-label">添加位置</label>
+//    <div class="layui-input-block">
+//     <input type="checkbox" name="close" lay-skin="switch" lay-text="是|否" lay-filter="switchT" id="cb" />
+//    </div>
+//   </div>
+// <button type="submit" class="layui-btn layui-btn-normal fr">保存</button>
+//</form>`
+//        });
+//        form.render();
+//        form.on('switch(switchT)', function (data) {
+//            if (data.elem.checked) {
+//                drawMarker();
+//            } else {
+//                mousetool.close(true);
+//            }
+//        });
+//    } else {
+//        layer.msg("请选择小区");
+//    }
+//}
+
+//function addBuilding(e) {
+//    document.getElementById('cb').checked = false;
+//    form.render('checkbox');
+//    mousetool.close(true);
+//    var errors = document.getElementsByClassName("clRedError");
+//    for (var i = 0; i < errors.length; i++) {
+//        errors[i].remove();
+//    }
+//    if (document.getElementById('fieldHidden2').innerText === "") {
+//        var div = document.createElement('div');
+//        div.classList.add("clRedError");
+//        div.innerHTML += `<p class="mb-5">请输入位置</p>`;
+//        e.appendChild(div);
+//    } else {
+//        var inputs = e.getElementsByTagName('input');
+//        var selects = e.getElementsByTagName('select');
+//        var building_number = inputs[0].value;
+//        var building_name = inputs[1].value;
+//        var building_address = inputs[2].value;
+//        var bluelabel = inputs[3].value;
+//        //var building_region = $('#selectProvinceTemp').find(":selected").text() + '/' + $('#selectCityTemp').find(":selected").text() + '/'+ $('#selectCountyTemp').find(":selected").text();
+//        var building_region = document.getElementById('fieldHidden').innerText;
+//        var building_type = selects[0].value;
+//        var building_lng = document.getElementById('fieldHidden2').innerText.split(" ")[0];
+//        var building_lat = document.getElementById('fieldHidden2').innerText.split(" ")[1];
+//        var village_id = document.getElementById('fieldHidden3').innerText;
+//        var source = "自建";
+//        $.ajax({
+//            type: "post",
+//            url: `./Level5Address.ashx?m=CreateBuilding`,
+//            data: { "building_number": building_number, "building_name": building_name, "building_address": building_address, "bluelabel": bluelabel, "building_region": building_region, "building_type": building_type, "building_lng": building_lng, "building_lat": building_lat, "village_id": village_id, "source": source },
+//            dataType: "json",
+//            success: function (data) {
+//                if (data.length !== 0) {
+//                    var div = document.createElement('div');
+//                    div.classList.add("clRedError");
+//                    data.forEach(function (error) {
+//                        div.innerHTML += `<p class="mb-5">${error}</p>`;
+//                    })
+//                    e.appendChild(div);
+//                } else {
+//                    layer.closeAll();
+//                    layer.msg("楼宇已添加");
+//                    $('#dg2').datagrid('reload');
+//                    var icon = new AMap.Icon({
+//                        size: new AMap.Size(15, 15),
+//                        image: './icons/circle.png',  // Icon的图像
+//                        imageSize: new AMap.Size(15, 15)
+//                    });
+//                    var marker = new AMap.Marker({
+//                        position: new AMap.LngLat(building_lng, building_lat),   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+//                        title: building_name,
+//                        icon: icon // 添加 Icon 图标 URL
+//                    });
+//                    map.add(marker);
+//                }
+//            },
+//            error: function (item, err) {
+//                console.log(err);
+//            }
+//        });
+//    }
+//}
+
+////楼宇详情
+//function getPoiDetail2(e) {
+//    var dataGuid = e.getAttribute("data-guid");
+//    $.ajax({
+//        type: "get",
+//        url: `./Level5Address.ashx?m=DetailsBuilding&id=${dataGuid}`,
+//        contentType: "application/json; charset=utf-8",
+//        dataType: "json",
+//        success: function (data) {
+//            layer.open({
+//                btn: [],
+//                move: false,
+//                offset: ['100px', '80%'],
+//                shade: 0,
+//                title: "楼宇信息",
+//                content: `<div class="mb-10"><span class="mr-5 bold">楼宇名称:</span><span>${data["Table"][0]["BUILDING_NAME"]}</span></div><div  class="mb-10"><span class="mr-5 bold">详细地址:</span><span>${data["Table"][0]["BUILDING_ADDRESS"]}</span></div><div  class="mb-10"><span class="mr-5 bold">蓝牌地址码:</span><span>${data["Table"][0]["BLUELABEL"]}</span></div><div  class="mb-10"><span class="mr-5 bold">区域:</span><span>${data["Table"][0]["REGION"]}</span></div><div  class="mb-10"><span class="mr-5 bold">类型:</span><span>${data["Table"][0]["TYPE"]}</span></div>`
+//            });
+//        },
+//        error: function (item, err) {
+//            console.log(err);
+//        }
+//    });
+//}
+
+////编辑楼宇
+//function editPoi2(e) {
+//    var dataGuid = e.getAttribute("data-guid");
+//    $.ajax({
+//        type: "get",
+//        url: `./Level5Address.ashx?m=DetailsBuilding&id=${dataGuid}`,
+//        contentType: "application/json; charset=utf-8",
+//        dataType: "json",
+//        success: function (data) {
+//            layer.open({
+//                btn: [],
+//                shade: 0,
+//                title: "编辑楼宇",
+//                end: function () {
+//                    mousetool.close(true);
+//                },
+//                content: `<form class="layui-form layui-form-pane" action="" onsubmit="event.preventDefault();editPoiBuilding(this);" data-guid=${dataGuid}>
+//                  <div class="layui-form-item">
+//                    <label class="layui-form-label">楼宇号码</label>
+//                    <div class="layui-input-inline">
+//                      <input type="text" name="building_name" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" value="${data["Table"][0]["BUILDING_NUMBER"]}" required>
+//                    </div>
+//                  </div>
+//<div class="layui-form-item">
+//                    <label class="layui-form-label">楼宇名称</label>
+//                    <div class="layui-input-inline">
+//                      <input type="text" name="building_name" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" value="${data["Table"][0]["BUILDING_NAME"]}" required>
+//                    </div>
+//                  </div>
+//                  <div class="layui-form-item">
+//                    <label class="layui-form-label">详细地址</label>
+//                    <div class="layui-input-inline">
+//                      <input type="text" name="building_address" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" value="${data["Table"][0]["BUILDING_ADDRESS"]}" required>
+//                    </div>
+//                  </div>
+// <div class="layui-form-item">
+//                    <label class="layui-form-label">蓝牌地址码</label>
+//                <div class="layui-input-block">
+//                      <input type="text" name="bluelabel" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" value="${data["Table"][0]["BLUELABEL"]}" required>
+//                    </div>
+//                  </div>
+//                <div class="layui-form-item">
+//                <label class="layui-form-label">区域</label>
+//                <div class="layui-input-block">
+//                  <select name="region" required>
+//                            <option value="` + data["Table"][0]["REGION"] + `">` + data["Table"][0]["REGION"] + `
+//                  </option></select>
+//                </div>
+//              </div>
+//<div class="layui-form-item">
+//                <label class="layui-form-label">类型</label>
+//                <div class="layui-input-block">
+//                  <select name="type" lay-filter="aihao" required>
+//                    <option value="地名地址信息;门牌信息;楼栋号">地名地址信息;门牌信息;楼栋号</option>
+//                  </select>
+//                </div>
+//              </div>
+//<div id="fieldHidden2" class="layui-form-item hidden"></div>
+//<div class="layui-form-item">
+//    <label class="layui-form-label">编辑位置</label>
+//    <div class="layui-input-block">
+//     <input type="checkbox" name="close" lay-skin="switch" lay-text="是|否" lay-filter="switchT" id="cb" />
+//    </div>
+//   </div>
+// <button type="submit" class="layui-btn layui-btn-normal fr">保存</button>
+//</form>`
+//            });
+//            form.render();
+//            form.on('switch(switchT)', function (data) {
+//                if (data.elem.checked) {
+//                    drawMarker();
+//                } else {
+//                    mousetool.close(true);
+//                }
+//            });
+//        },
+//        error: function (item, err) {
+//            console.log(err);
+//        }
+//    });
+//}
+
+//function editPoiBuilding(e) {
+//    document.getElementById('cb').checked = false;
+//    form.render('checkbox');
+//    mousetool.close(true);
+//    var errors = document.getElementsByClassName("clRedError");
+//    for (var i = 0; i < errors.length; i++) {
+//        errors[i].remove();
+//    }
+//    if (document.getElementById('fieldHidden2').innerText === "") {
+//        var div = document.createElement('div');
+//        div.classList.add("clRedError");
+//        div.innerHTML += `<p class="mb-5">请输入位置</p>`;
+//        e.appendChild(div);
+//    } else {
+//        var inputs = e.getElementsByTagName('input');
+//        var building_number = inputs[0].value;
+//        var building_name = inputs[1].value;
+//        var building_address = inputs[2].value
+//        var bluelabel = inputs[3].value
+//        var building_region = inputs[4].value;
+//        var building_type = inputs[5].value;
+//        var building_lng = document.getElementById('fieldHidden2').innerText.split(" ")[0];
+//        var building_lat = document.getElementById('fieldHidden2').innerText.split(" ")[1];
+//        var dataGuid = e.getAttribute("data-guid");
+//        $.ajax({
+//            type: "post",
+//            url: `./Level5Address.ashx?m=EditBuilding&id=${dataGuid}`,
+//            data: { "building_number": building_number, "building_name": building_name, "building_address": building_address, "bluelabel": bluelabel, "building_region": building_region, "building_type": building_type, "building_lng": building_lng, "building_lat": building_lat },
+//            dataType: "json",
+//            success: function (data) {
+//                if (data.length !== 0) {
+//                    var div = document.createElement('div');
+//                    div.classList.add("clRedError");
+//                    data.forEach(function (error) {
+//                        div.innerHTML += `<p class="mb-5">${error}</p>`;
+//                    })
+//                    e.appendChild(div);
+//                } else {
+//                    layer.closeAll();
+//                    layer.msg("楼宇已编辑");
+//                    $('#dg2').datagrid('reload');
+//                    var markers = map.getAllOverlays("marker");
+//                    var icon = new AMap.Icon({
+//                        size: new AMap.Size(15, 15),
+//                        image: './icons/circle1.png',  // Icon的图像
+//                        imageSize: new AMap.Size(15, 15)
+//                    });
+//                    markers.forEach(function (marker) {
+//                        if (marker.getIcon().B.image === "./icons/circle1.png") {
+//                            map.remove(marker);
+//                        }
+//                    });
+//                    var marker = new AMap.Marker({
+//                        position: new AMap.LngLat(building_lng, building_lat),   // 经纬度对象，也可以是经纬度构成的一维数组[116.39, 39.9]
+//                        title: building_name,
+//                        icon: icon // 添加 Icon 图标 URL
+//                    });
+//                    map.add(marker);
+//                }
+//            },
+//            error: function (item, err) {
+//                console.log(err);
+//            }
+//        });
+//    }
+//}
+
+////删除楼宇
+//function deletePoi2(e) {
+//    var dataGuid = e.getAttribute("data-guid");
+//    layer.open({
+//        btn: [],
+//        shade: 0,
+//        title: "删除楼宇",
+//        content: `<div><div class="mb-15 tc">确定删除楼宇?</div><div class="tr"><button type="button" class="layui-btn layui-btn-danger" data-guid=${dataGuid} onclick="deletePoiFinal2(this);">删除</button></div></div>`
+//    });
+//}
+
+//function deletePoiFinal2(e) {
+//    var dataGuid = e.getAttribute("data-guid");
+//    $.ajax({
+//        type: "post",
+//        url: `./Level5Address.ashx?m=DeleteBuilding&id=${dataGuid}`,
+//        dataType: "json",
+//        success: function (data) {
+//            if (data.length !== 0) {
+//                console.log('error');
+//            } else {
+//                layer.closeAll();
+//                layer.msg("楼宇已删除");
+//                $('#dg2').datagrid('reload');
+//                var markers = map.getAllOverlays("marker");
+//                markers.forEach(function (marker) {
+//                    if (marker.getIcon().B.image === "./icons/circle1.png") {
+//                        map.remove(marker);
+//                    }
+//                });
+//            }
+
+//        },
+//        error: function (item, err) {
+//            console.log(err);
+//        }
+//    });
+//}
+
+
+
+
+////下拉框
+//var d = "";
+//$.ajax({
+//    type: "get",
+//    url: `./region.json`,
+//    contentType: "application/json; charset=utf-8",
+//    dataType: "json",
+//    success: function (data) {
+//        d = data;
+//        var selectProvince = ``;
+//        d.forEach(function (item) {
+//            if (item["item_code"].slice(2) === '0000') {
+//                selectProvince += `<option value=${item["item_code"]}>${item["item_name"]}</option>`;
+//            }
+//        });
+//        var selectP = document.getElementById('selectProvince');
+//        var selectC = document.getElementById('selectCity');
+//        var selectCT = document.getElementById('selectCounty');
+//        selectP.innerHTML += selectProvince;
+//        selectP.addEventListener('change', function (e) {
+//            var value = e.target.value;
+//            if (value !== "") {
+//                selectC.innerHTML = `<option value="">全部</option>`;
+//                d.forEach(function (i) {
+//                    if ((i["item_code"].slice(0, 2) === value.slice(0, 2)) && (i["item_code"].slice(2) !== "0000") && (i["item_code"].slice(4, 6) === "00")) {
+//                        selectC.innerHTML += `<option value=${i["item_code"]}>${i["item_name"]}</option>`;
+//                    }
+//                });
+//            }
+//        });
+//        selectC.addEventListener('change', function (e) {
+//            var value = e.target.value;
+//            if (value !== "") {
+//                selectCT.innerHTML = `<option value="">全部</option>`;
+//                d.forEach(function (i2) {
+//                    if (value == '110100' || value == "120100" || value == "310100" || value == "500100") {
+//                        if (value.slice(0, 3) === (i2["item_code"].slice(0, 3)) && (i2["item_code"].slice(4, 6) !== "00")) {
+//                            selectCT.innerHTML += `<option value=${i2["item_code"]}>${i2["item_name"]}</option>`;
+//                        }
+//                    } else {
+//                        if (value.slice(0, 4) === (i2["item_code"].slice(0, 4)) && (i2["item_code"].slice(4, 6) !== "00")) {
+//                            selectCT.innerHTML += `<option value=${i2["item_code"]}>${i2["item_name"]}</option>`;
+//                        }
+//                    }
+//                });
+//                // get data for current city and display on map
+//                var city = $("#selectCity").find("option:selected").text();
+//                var stateA = $('#checkboxHasBuildings').checkbox('options').checked;
+//                var stateB = $('#checkboxHasBounds').checkbox('options').checked;
+//                var stateFinal = "";
+//                if (stateA && !stateB) {
+//                    stateFinal = "1";
+//                } else if (!stateA && stateB) {
+//                    stateFinal = "2";
+//                } else if (stateA && stateB) {
+//                    stateFinal = "3";
+//                } else {
+//                    stateFinal = "4"
+//                }
+//                if (stateFinal !== "4") {
+//                    map.clearMap();
+//                    $("#dg").datagrid({
+//                        pageNumber: 1,
+//                        url: `./Level5Address.ashx?m=IndexByCityRegionHasBuildingsBounds&cityregion=${city}&stateFinal=${stateFinal}`,
+//                        method: 'get',
+//                        onLoadSuccess: function (data) {
+//                            document.getElementsByClassName('datagrid-row')[0].click();
+//                        }
+//                    });
+//                } else {
+//                    map.clearMap();
+//                    $("#dg").datagrid({
+//                        pageNumber: 1,
+//                        url: `./Level5Address.ashx?m=IndexByCityRegion&cityregion=${city}`,
+//                        method: 'get',
+//                        onLoadSuccess: function (data) {
+//                            document.getElementsByClassName('datagrid-row')[0].click();
+//                        }
+//                    });
+//                }
+
+//                //$("#dg").datagrid({
+//                //    pageNumber: 1,
+//                //    url: `./Level5Address.ashx?m=IndexByCity&city=${city}`,
+//                //    method: 'get',
+//                //    onLoadSuccess: function (data) {
+
+//                //        document.getElementsByClassName('datagrid-row')[0].click();
+//                //    }
+//                //});
+//            }
+//        });
+
+//        selectCT.addEventListener('change', function (e) {
+//            var value = e.target.value;
+//            if (value !== "") {
+//                map.clearMap();
+//                var province = $("#selectProvince").find("option:selected").text();
+//                var city = $("#selectCity").find("option:selected").text();
+//                var county = $("#selectCounty").find("option:selected").text();
+//                var region = province + "/" + city + "/" + county;
+//                var stateA = $('#checkboxHasBuildings').checkbox('options').checked;
+//                var stateB = $('#checkboxHasBounds').checkbox('options').checked;
+//                var stateFinal = "";
+//                if (stateA && !stateB) {
+//                    stateFinal = "1";
+//                } else if (!stateA && stateB) {
+//                    stateFinal = "2";
+//                } else if (stateA && stateB) {
+//                    stateFinal = "3";
+//                } else {
+//                    stateFinal = "4"
+//                }
+//                if (stateFinal !== "4") {
+//                    map.clearMap();
+//                    $("#dg").datagrid({
+//                        pageNumber: 1,
+//                        url: `./Level5Address.ashx?m=IndexByCityRegionHasBuildingsBounds&cityregion=${region}&stateFinal=${stateFinal}`,
+//                        method: 'get',
+//                        onLoadSuccess: function (data) {
+//                            document.getElementsByClassName('datagrid-row')[0].click();
+//                        }
+//                    });
+//                } else {
+//                    map.clearMap();
+//                    $("#dg").datagrid({
+//                        pageNumber: 1,
+//                        url: `./Level5Address.ashx?m=IndexByCityRegion&cityregion=${region}`,
+//                        method: 'get',
+//                        onLoadSuccess: function (data) {
+//                            document.getElementsByClassName('datagrid-row')[0].click();
+//                        }
+//                    });
+//                }
+//                //$("#dg").datagrid({
+//                //    pageNumber: 1,
+//                //    url: `./Level5Address.ashx?m=IndexByRegion&region=${region}`,
+//                //    method: 'get',
+//                //    onLoadSuccess: function (data) {
+
+//                //        document.getElementsByClassName('datagrid-row')[0].click();
+//                //    }
+//                //});
+//            } else {
+//                var city = $("#selectCity").find("option:selected").text();
+//                var stateA = $('#checkboxHasBuildings').checkbox('options').checked;
+//                var stateB = $('#checkboxHasBounds').checkbox('options').checked;
+//                var stateFinal = "";
+//                if (stateA && !stateB) {
+//                    stateFinal = "1";
+//                } else if (!stateA && stateB) {
+//                    stateFinal = "2";
+//                } else if (stateA && stateB) {
+//                    stateFinal = "3";
+//                } else {
+//                    stateFinal = "4"
+//                }
+//                if (stateFinal !== "4") {
+//                    map.clearMap();
+//                    $("#dg").datagrid({
+//                        pageNumber: 1,
+//                        url: `./Level5Address.ashx?m=IndexByCityRegionHasBuildingsBounds&cityregion=${city}&stateFinal=${stateFinal}`,
+//                        method: 'get',
+//                        onLoadSuccess: function (data) {
+//                            document.getElementsByClassName('datagrid-row')[0].click();
+//                        }
+//                    });
+//                } else {
+//                    map.clearMap();
+//                    $("#dg").datagrid({
+//                        pageNumber: 1,
+//                        url: `./Level5Address.ashx?m=IndexByCityRegion&cityregion=${city}`,
+//                        method: 'get',
+//                        onLoadSuccess: function (data) {
+//                            document.getElementsByClassName('datagrid-row')[0].click();
+//                        }
+//                    });
+//                }
+//                //$("#dg").datagrid({
+//                //    pageNumber: 1,
+//                //    url: `./Level5Address.ashx?m=IndexByCity&city=${city}`,
+//                //    method: 'get',
+//                //    onLoadSuccess: function (data) {
+
+//                //        document.getElementsByClassName('datagrid-row')[0].click();
+//                //    }
+//                //});
+//            }
+//        })
+//    },
+//    error: function (item, err) {
+//        console.log(err);
+//    }
+//});
+
+//setTimeout(function () {
+//    document.getElementsByClassName('panel-body-noheader')[0].classList.add("w-100p");
+//    var container = document.createElement('div');
+//    container.setAttribute("id", "buttonOpenClose");
+//    container.innerHTML += `<span class="bb-lightblue pb-5px mr-20">是否显示小区边界</span><button type="button" class="layui-btn layui-btn-radius layui-btn-normal layui-btn-sm" onclick="openPois(this);" disabled>是 <i class="fa fa-check ml-3px"></i></button><button type="button" class="layui-btn layui-btn-primary layui-btn-radius layui-btn-sm" onclick="closePois(this);">否</button>`;
+//    document.getElementsByClassName('panel')[1].appendChild(container);
+//}, 5000);

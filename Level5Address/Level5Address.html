@@ -1,0 +1,112 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+<meta name="viewport" content="width=device-width initial-scale=1.0 maximum-scale=1.0 user-scalable=0">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <link href="font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+
+        <link href="../../../HtmlLibs/easyui/themes/default/easyui.css" rel="stylesheet" />
+    <link href="../../../HtmlLibs/easyui/themes/icon.css" rel="stylesheet" />
+            <link href="layui-v2.5.4/layui/css/layui.css" rel="stylesheet" />
+    <link href="Level5Address.css" rel="stylesheet" />
+
+<title>客服GIS</title>
+<style>
+body,html{ margin:0;padding:0;font:12px/16px Verdana,Helvetica,Arial,sans-serif;width: 100%;height: 100%}
+.container{
+  height: 100%
+}
+</style>
+<script language="javascript" src="//webapi.amap.com/maps?v=1.4.15&key=3cd18e86c129259575068fdb7f2522e0&plugin=AMap.ControlBar,AMap.PolyEditor,AMap.MouseTool"></script>
+</head>
+<body>
+    <div id="container" style="width:100%; height:100%;resize:both;"></div>
+
+    <div id="countySelect">
+
+        <form class="layui-form layui-form-pane" action="">
+
+            <div class="layui-form-item">
+
+                <div class="layui-input-inline">
+                    <select id="selectCounties" name="counties" lay-filter="selectCounties">
+                        <option value="all">全部</option>
+                        <option value="6C2FEA0A905D4A3C887030FA875453BC">新民市</option>
+                        <option value="5C0D0AE8E0A74205B96421FF7BB9D589">辽中区</option>
+                        <option value="FDB394D809084D0D809A0A46AE2119BA">苏家屯区</option>
+                        <option value="5893D00F6FED4AD1AECB43D52782D011">大东区</option>
+                        <option value="CFDD36585EC54B5EB879D8A5AE67E8FD">沈北新区</option>
+                        <option value="AB3FC6F876C24EC5A06E2DA953542B77">法库县</option>
+                        <option value="D44564C69AF74077B88749C870F90EE0">于洪区</option>
+                        <option value="6B670CF2B1014090AC44BF6CBCE36555">铁西区</option>
+                        <option value="00580AEB24D34A5BAF63147B61478076">皇姑区</option>
+                        <option value="ABF5D7F455DF4C73BECA99F035C3AE88">康平县</option>
+                        <option value="72FAAB41B6A54C47A4A56EC50152EE00">沈河区</option>
+                        <option value="7946E630410E4C59B7B364657BF3FD8C">浑南区</option>
+                        <option value="21F930DCD3164BA99D86305DED787F21">和平区</option>
+                    </select>
+                </div>
+
+
+            </div>
+
+        </form>
+    </div>
+
+    <div id="tablesContainer">
+        <div id="tablesContainerInner">
+            <table id="tableStreet" style="width:50%;height:250px"></table>
+            <table id="tableCommunity" style="width:50%;height:250px"></table>
+
+        </div>
+    </div>
+
+    <div id="tablesContainer2">
+        <div id="tablesContainerInner2">
+
+            <table id="tableVillage" style="width:50%;height:250px"></table>
+            <table id="tableBuilding" style="width:50%;height:250px"></table>
+
+        </div>
+    </div>
+
+    <div id="sep">
+
+    </div>
+
+    <div id="buttonsGroup1">
+        <button id="buttonGetSC" type="button" class="layui-btn layui-btn-primary layui-btn-xs layui-btn-disabled"><</button>
+        <button id="buttonGetVB" type="button" class="layui-btn layui-btn-primary layui-btn-xs">></button>
+    </div>
+
+    <button id="buttonToggleTables" type="button" class="layui-btn layui-btn-primary layui-btn-radius"></button>
+
+    <div id="tbS">
+        <span class="bold">街道</span>
+        <span class="cursorPointer bold" onclick='createStreet()'>新建街道</span>
+    </div>
+
+    <div id="tbC">
+        <span class="bold">社区</span>
+        <span class="cursorPointer bold" onclick='createCommunity()'>新建社区</span>
+    </div>
+
+    <div id="tbV">
+        <span class="bold">小区</span>
+        <span class="cursorPointer bold" onclick='createVillage()'>新建小区</span>
+    </div>
+
+    <div id="tbB">
+        <span class="bold">楼栋</span>
+        <span class="cursorPointer bold" onclick='createBuilding()'>新建楼栋</span>
+    </div>
+
+    <script src="../../../HtmlLibs/easyui/jquery.min.js"></script>
+    <script src="../../../HtmlLibs/easyui/jquery.easyui.min.js"></script>
+    <script src="../../../HtmlLibs/easyui/locale/easyui-lang-zh_CN.js"></script>
+    <!--<script src="../../../HtmlLibs/layui/layui.js"></script>-->
+    <script src="layui-v2.5.4/layui/layui.js"></script>
+    <script src="Level5Address.js"></script>
+
+</body>
+</html>
